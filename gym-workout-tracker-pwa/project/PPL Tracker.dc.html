@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=JetBrains+Mono:wght@500;600;700&family=Nunito:wght@400;600;700;800;900&display=swap">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f0eee9;font-family:'Nunito',sans-serif}
+@keyframes spin{to{transform:rotate(360deg)}}
+.dv-turn{padding:40px 44px 40px;border-bottom:1px solid rgba(0,0,0,.08);scroll-margin-top:16px}
+.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 20px}
+.dv-tid{font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#1a1a1a;color:#fff;border-radius:4px;text-decoration:none}
+.dv-tname{font:600 13px/1.2 system-ui,sans-serif;color:#1a1a1a}
+.dv-opts{display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start;margin-bottom:6px}
+.dv-opt{flex:none;display:flex;flex-direction:column;gap:9px;scroll-margin-top:16px}
+.dv-oid{font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(0,0,0,.08);color:#1a1a1a;border-radius:5px;text-decoration:none}
+.dv-olabel{display:flex;align-items:baseline;gap:8px;font:400 11px/1.3 system-ui,sans-serif;color:rgba(0,0,0,.55)}
+.dv-card{max-width:100%;background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.06);overflow:hidden}
+.dv-opt:target .dv-oid{background:#2a78d6;color:#fff}
+.dv-next{margin:24px 0 0;font:12px/1.5 system-ui,sans-serif;color:rgba(0,0,0,.5)}
+.dv-subhead{font:700 12px system-ui,sans-serif;color:rgba(0,0,0,.42);text-transform:uppercase;letter-spacing:.06em;margin:30px 0 14px}
+</style>
+</helmet>
+<div style="max-width:640px;margin:0 auto;padding:40px 44px 6px;font-family:system-ui,sans-serif;">
+<div style="font-weight:800;font-size:21px;color:#1a1a1a;">PPL Tracker — first pass</div>
+<div style="font-size:13px;line-height:1.65;color:rgba(0,0,0,.6);margin-top:10px;">Assumptions: 6-day split — Push, Pull, Legs, repeat, hitting each muscle group twice a week. Exercises picked for a full commercial gym like Slam Fitness (barbell, dumbbells, cable stack, leg press, treadmill) — swap anything later. Logging kept simple: weight × reps, in kg. Tap the day tabs on any phone below to flip between Push / Pull / Legs, and tap an exercise to check it off.</div>
+</div>
+<section class="dv-turn" id="t1">
+<div class="dv-thd"><a class="dv-tid" href="#t1">1</a><span class="dv-tname">Four directions for the daily workout screen, plus the Google Sync flow</span></div>
+<div class="dv-subhead">Today's workout — pick a direction</div>
+<div class="dv-opts">
+
+<div class="dv-opt" id="1a">
+<div class="dv-olabel"><a class="dv-oid" href="#1a">1a</a>Bold Rounded — dark cards</div>
+<div class="dv-card" style="background:transparent;border:none;box-shadow:none;overflow:visible;border-radius:0;">
+<div style="--bg:oklch(19% 0.006 55);--card:oklch(25% 0.012 50);--accent:oklch(64% 0.20 29);--accent-ink:oklch(13% 0.02 29);--good:oklch(62% 0.15 152);--text:oklch(96% 0.004 60);--muted:oklch(68% 0.014 55);--line:oklch(32% 0.012 50);--pill-bg:oklch(29% 0.014 50);width:296px;background:var(--bg);border-radius:40px;padding:10px;box-shadow:0 24px 60px -24px rgba(0,0,0,.55);font-family:'Nunito',sans-serif;">
+<div style="width:56px;height:5px;border-radius:3px;background:rgba(128,128,128,.35);margin:8px auto 2px;"></div>
+<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 14px 2px;font-size:12px;color:var(--text);font-weight:800;">
+<span>9:41</span>
+<div style="width:18px;height:10px;border:1.4px solid var(--text);border-radius:2px;position:relative;"><div style="position:absolute;top:1.5px;bottom:1.5px;right:2px;width:9px;background:var(--text);border-radius:1px;"></div></div>
+</div>
+<div style="padding:14px 14px 18px;display:flex;flex-direction:column;gap:14px;position:relative;min-height:600px;">
+<div style="display:flex;justify-content:space-between;align-items:flex-start;">
+<div>
+<div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:25px;color:var(--text);">{{ viewA.dayFull }}</div>
+<div style="font-size:12.5px;color:var(--muted);font-weight:700;margin-top:2px;">{{ viewA.subtitle }}</div>
+</div>
+<div style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.06);padding:6px 10px;border-radius:20px;">
+<div style="width:7px;height:7px;border-radius:50%;background:var(--good);"></div>
+<span style="font-size:10px;color:var(--muted);font-weight:700;">{{ syncLabel }}</span>
+</div>
+</div>
+<div style="display:flex;gap:8px;">
+<sc-for list="{{ viewA.tabs }}" as="tab" hint-placeholder-count="3">
+<sc-if value="{{ tab.active }}" hint-placeholder-val="{{ false }}"><button style="flex:1;border:none;padding:10px 0;border-radius:16px;font-family:'Nunito',sans-serif;font-weight:800;font-size:12.5px;letter-spacing:.4px;cursor:pointer;background:var(--accent);color:var(--accent-ink);">{{ tab.label }}</button></sc-if>
+<sc-if value="{{ tab.notActive }}" hint-placeholder-val="{{ true }}"><button onClick="{{ tab.onClick }}" style="flex:1;border:none;padding:10px 0;border-radius:16px;font-family:'Nunito',sans-serif;font-weight:800;font-size:12.5px;letter-spacing:.4px;cursor:pointer;background:var(--pill-bg);color:var(--muted);">{{ tab.label }}</button></sc-if>
+</sc-for>
+</div>
+<div>
+<div style="font-size:12px;color:var(--muted);font-weight:700;margin-bottom:6px;">{{ viewA.progressLabel }}</div>
+<div style="height:8px;border-radius:6px;background:rgba(255,255,255,.08);overflow:hidden;">
+<div style="height:100%;border-radius:6px;background:var(--accent);width:{{ viewA.pct }}%;"></div>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;">
+<sc-for list="{{ viewA.items }}" as="item" hint-placeholder-count="6">
+<div onClick="{{ item.onToggle }}" style="display:flex;align-items:center;gap:12px;background:var(--card);border-radius:18px;padding:12px 14px;cursor:pointer;opacity:{{ item.rowOpacity }};">
+<div style="width:26px;height:26px;border-radius:50%;border:2px solid {{ item.checkBorder }};background:{{ item.checkBg }};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+<sc-if value="{{ item.done }}" hint-placeholder-val="{{ false }}"><span style="color:var(--bg);font-size:13px;font-weight:900;">✓</span></sc-if>
+</div>
+<div style="flex:1;">
+<div style="font-size:14.5px;font-weight:800;color:var(--text);">{{ item.name }}</div>
+<div style="font-size:11.5px;color:var(--muted);font-weight:600;margin-top:1px;">{{ item.metaLine }}</div>
+</div>
+<div style="font-family:'Baloo 2',sans-serif;font-size:15.5px;font-weight:800;color:var(--accent);white-space:nowrap;">{{ item.setsRepsText }}</div>
+</div>
+</sc-for>
+</div>
+<button style="border:none;background:var(--accent);color:var(--accent-ink);font-family:'Baloo 2',sans-serif;font-weight:800;font-size:15.5px;padding:15px;border-radius:20px;cursor:pointer;">Start Workout</button>
+<div style="display:flex;justify-content:space-around;padding:10px 4px 6px;border-top:1px solid var(--line);margin-top:2px;">
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:var(--accent);"></div><span style="font-size:10px;font-weight:800;color:var(--text);">Today</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:var(--line);"></div><span style="font-size:10px;font-weight:700;color:var(--muted);">Log</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:var(--line);"></div><span style="font-size:10px;font-weight:700;color:var(--muted);">Trends</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:var(--line);"></div><span style="font-size:10px;font-weight:700;color:var(--muted);">Profile</span></div>
+</div>
+<div style="width:100px;height:4px;border-radius:2px;background:var(--text);opacity:.22;margin:6px auto 0;"></div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="dv-opt" id="1b">
+<div class="dv-olabel"><a class="dv-oid" href="#1b">1b</a>Clean Minimal — light, ring progress</div>
+<div class="dv-card" style="background:transparent;border:none;box-shadow:none;overflow:visible;border-radius:0;">
+<div style="--bg:oklch(97% 0.006 60);--card:oklch(100% 0 0);--accent:oklch(60% 0.19 29);--accent-ink:oklch(99% 0 0);--good:oklch(58% 0.14 152);--text:oklch(23% 0.008 50);--muted:oklch(53% 0.012 50);--line:oklch(90% 0.006 55);width:296px;background:var(--bg);border-radius:40px;padding:10px;box-shadow:0 24px 60px -24px rgba(0,0,0,.25);font-family:'Nunito',sans-serif;">
+<div style="width:56px;height:5px;border-radius:3px;background:rgba(0,0,0,.15);margin:8px auto 2px;"></div>
+<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 14px 2px;font-size:12px;color:var(--text);font-weight:800;">
+<span>9:41</span>
+<div style="width:18px;height:10px;border:1.4px solid var(--text);border-radius:2px;position:relative;"><div style="position:absolute;top:1.5px;bottom:1.5px;right:2px;width:9px;background:var(--text);border-radius:1px;"></div></div>
+</div>
+<div style="padding:16px 18px 18px;display:flex;flex-direction:column;gap:18px;position:relative;min-height:600px;">
+<div>
+<div style="font-size:11.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;">Slam Fitness</div>
+<div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:26px;color:var(--text);margin-top:4px;">{{ viewB.dayFull }}</div>
+<div style="display:flex;align-items:center;gap:6px;margin-top:6px;">
+<div style="width:6px;height:6px;border-radius:50%;background:var(--good);"></div>
+<span style="font-size:11.5px;color:var(--muted);font-weight:600;">{{ syncLabel }}</span>
+</div>
+</div>
+<div style="display:flex;gap:20px;">
+<sc-for list="{{ viewB.tabs }}" as="tab" hint-placeholder-count="3">
+<sc-if value="{{ tab.active }}" hint-placeholder-val="{{ false }}"><span style="font-weight:900;font-size:13px;color:var(--text);border-bottom:2.5px solid var(--accent);padding-bottom:6px;cursor:pointer;">{{ tab.label }}</span></sc-if>
+<sc-if value="{{ tab.notActive }}" hint-placeholder-val="{{ true }}"><span onClick="{{ tab.onClick }}" style="font-weight:700;font-size:13px;color:var(--muted);border-bottom:2.5px solid transparent;padding-bottom:6px;cursor:pointer;">{{ tab.label }}</span></sc-if>
+</sc-for>
+</div>
+<div style="display:flex;align-items:center;justify-content:center;">
+<div style="position:relative;width:76px;height:76px;">
+<svg width="76" height="76" viewBox="0 0 76 76">
+<circle cx="38" cy="38" r="30" fill="none" stroke="var(--line)" stroke-width="7"></circle>
+<circle cx="38" cy="38" r="30" fill="none" stroke="var(--accent)" stroke-width="7" stroke-linecap="round" stroke-dasharray="{{ viewB.ringCirc }}" stroke-dashoffset="{{ viewB.ringOffset }}" transform="rotate(-90 38 38)"></circle>
+</svg>
+<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:17px;color:var(--text);">{{ viewB.pct }}%</div>
+</div>
+</div>
+<div style="text-align:center;font-size:12px;color:var(--muted);font-weight:700;margin-top:-10px;">{{ viewB.progressLabel }}</div>
+<div style="display:flex;flex-direction:column;">
+<sc-for list="{{ viewB.items }}" as="item" hint-placeholder-count="6">
+<div onClick="{{ item.onToggle }}" style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line);cursor:pointer;">
+<div style="width:22px;height:22px;border-radius:50%;border:2px solid {{ item.checkBorder }};background:{{ item.checkBg }};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+<sc-if value="{{ item.done }}" hint-placeholder-val="{{ false }}"><span style="color:#fff;font-size:11px;font-weight:900;">✓</span></sc-if>
+</div>
+<div style="flex:1;">
+<div style="font-size:14px;font-weight:800;color:var(--text);">{{ item.name }}</div>
+<div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:1px;">{{ item.metaLine }}</div>
+</div>
+<div style="font-size:13px;font-weight:800;color:var(--text);white-space:nowrap;">{{ item.setsRepsText }}</div>
+</div>
+</sc-for>
+</div>
+<div style="position:absolute;bottom:64px;right:0;width:58px;height:58px;border-radius:50%;background:var(--accent);box-shadow:0 14px 26px -10px var(--accent);display:flex;align-items:center;justify-content:center;cursor:pointer;">
+<div style="width:0;height:0;border-top:8px solid transparent;border-bottom:8px solid transparent;border-left:13px solid var(--accent-ink);margin-left:4px;"></div>
+</div>
+<div style="display:flex;justify-content:space-around;padding:10px 4px 6px;border-top:1px solid var(--line);margin-top:auto;">
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:var(--accent);"></div><span style="font-size:10px;font-weight:800;color:var(--text);">Today</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:var(--line);"></div><span style="font-size:10px;font-weight:700;color:var(--muted);">Log</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:var(--line);"></div><span style="font-size:10px;font-weight:700;color:var(--muted);">Trends</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:var(--line);"></div><span style="font-size:10px;font-weight:700;color:var(--muted);">Profile</span></div>
+</div>
+<div style="width:100px;height:4px;border-radius:2px;background:var(--text);opacity:.15;margin:6px auto 0;"></div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="dv-opt" id="1c">
+<div class="dv-olabel"><a class="dv-oid" href="#1c">1c</a>Energetic Bold — hero blocks</div>
+<div class="dv-card" style="background:transparent;border:none;box-shadow:none;overflow:visible;border-radius:0;">
+<div style="--bg:oklch(98% 0.01 60);--hero1:oklch(64% 0.20 29);--hero2:oklch(56% 0.19 16);--card:oklch(100% 0 0);--tint:oklch(94% 0.035 40);--text:oklch(20% 0.01 40);--muted:oklch(50% 0.02 40);--good:oklch(60% 0.15 152);--accent-ink:oklch(99% 0 0);width:296px;background:var(--bg);border-radius:40px;padding:10px;box-shadow:0 24px 60px -24px rgba(0,0,0,.3);font-family:'Nunito',sans-serif;">
+<div style="width:56px;height:5px;border-radius:3px;background:rgba(0,0,0,.15);margin:8px auto 2px;"></div>
+<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 14px 2px;font-size:12px;color:var(--text);font-weight:800;">
+<span>9:41</span>
+<div style="width:18px;height:10px;border:1.4px solid var(--text);border-radius:2px;position:relative;"><div style="position:absolute;top:1.5px;bottom:1.5px;right:2px;width:9px;background:var(--text);border-radius:1px;"></div></div>
+</div>
+<div style="padding:10px 8px 18px;display:flex;flex-direction:column;gap:16px;min-height:600px;">
+<div style="border-radius:24px;padding:20px 20px 30px;background:linear-gradient(135deg,var(--hero1),var(--hero2));clip-path:polygon(0 0,100% 0,100% 88%,0 100%);position:relative;">
+<div style="display:flex;justify-content:flex-end;margin-bottom:10px;">
+<div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.22);padding:5px 10px;border-radius:14px;">
+<div style="width:6px;height:6px;border-radius:50%;background:#fff;"></div>
+<span style="font-size:9.5px;color:#fff;font-weight:800;">{{ syncLabel }}</span>
+</div>
+</div>
+<div style="display:flex;gap:8px;margin-bottom:16px;">
+<sc-for list="{{ viewC.tabs }}" as="tab" hint-placeholder-count="3">
+<sc-if value="{{ tab.active }}" hint-placeholder-val="{{ false }}"><span style="background:#fff;color:var(--hero1);font-weight:800;font-size:11.5px;padding:7px 13px;border-radius:12px;cursor:pointer;">{{ tab.label }}</span></sc-if>
+<sc-if value="{{ tab.notActive }}" hint-placeholder-val="{{ true }}"><span onClick="{{ tab.onClick }}" style="background:rgba(255,255,255,.2);color:#fff;font-weight:700;font-size:11.5px;padding:7px 13px;border-radius:12px;cursor:pointer;">{{ tab.label }}</span></sc-if>
+</sc-for>
+</div>
+<div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:28px;color:#fff;">{{ viewC.dayFull }}</div>
+<div style="font-size:12.5px;color:rgba(255,255,255,.85);font-weight:700;margin-top:4px;">{{ viewC.subtitle }}</div>
+</div>
+<div>
+<div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:20px;color:var(--text);">{{ viewC.doneShout }}</div>
+<div style="display:flex;gap:6px;margin-top:8px;">
+<sc-for list="{{ viewC.items }}" as="item" hint-placeholder-count="6">
+<div style="width:11px;height:11px;border-radius:50%;border:2px solid {{ item.checkBorder }};background:{{ item.checkBg }};"></div>
+</sc-for>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;">
+<sc-for list="{{ viewC.items }}" as="item" hint-placeholder-count="6">
+<div onClick="{{ item.onToggle }}" style="display:flex;align-items:center;gap:12px;background:var(--card);border-radius:16px;padding:12px 14px;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.05);opacity:{{ item.rowOpacity }};">
+<div style="flex:1;">
+<span style="display:inline-block;background:var(--tint);color:var(--hero1);font-size:10px;font-weight:800;padding:3px 8px;border-radius:8px;margin-bottom:5px;">{{ item.muscle }}</span>
+<div style="font-size:14px;font-weight:800;color:var(--text);">{{ item.name }}</div>
+</div>
+<div style="font-family:'Baloo 2',sans-serif;font-size:18px;font-weight:800;color:var(--hero1);white-space:nowrap;">{{ item.setsRepsText }}</div>
+</div>
+</sc-for>
+</div>
+<div style="display:flex;justify-content:center;margin-top:2px;">
+<button style="width:72px;height:72px;border-radius:50%;border:none;background:var(--hero1);color:var(--accent-ink);font-family:'Baloo 2',sans-serif;font-weight:800;font-size:18px;box-shadow:0 16px 30px -10px var(--hero1);cursor:pointer;">GO</button>
+</div>
+<div style="display:flex;justify-content:space-around;padding:8px 4px 4px;border-top:1px solid var(--tint);margin-top:2px;">
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:var(--hero1);"></div><span style="font-size:10px;font-weight:800;color:var(--text);">Today</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:var(--tint);"></div><span style="font-size:10px;font-weight:700;color:var(--muted);">Log</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:var(--tint);"></div><span style="font-size:10px;font-weight:700;color:var(--muted);">Trends</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:var(--tint);"></div><span style="font-size:10px;font-weight:700;color:var(--muted);">Profile</span></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="dv-opt" id="1d">
+<div class="dv-olabel"><a class="dv-oid" href="#1d">1d</a>Performance Dashboard — timeline + stats</div>
+<div class="dv-card" style="background:transparent;border:none;box-shadow:none;overflow:visible;border-radius:0;">
+<div style="--bg:oklch(15% 0.01 40);--card:oklch(21% 0.014 35);--accent:oklch(66% 0.22 25);--accent-ink:oklch(12% 0.02 25);--good:oklch(68% 0.17 150);--text:oklch(95% 0.006 60);--muted:oklch(63% 0.016 50);--line:oklch(31% 0.016 40);width:296px;background:var(--bg);border-radius:40px;padding:10px;box-shadow:0 24px 60px -24px rgba(0,0,0,.6);font-family:'Nunito',sans-serif;">
+<div style="width:56px;height:5px;border-radius:3px;background:rgba(128,128,128,.35);margin:8px auto 2px;"></div>
+<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 14px 2px;font-size:12px;color:var(--text);font-weight:800;">
+<span>9:41</span>
+<div style="width:18px;height:10px;border:1.4px solid var(--text);border-radius:2px;position:relative;"><div style="position:absolute;top:1.5px;bottom:1.5px;right:2px;width:9px;background:var(--text);border-radius:1px;"></div></div>
+</div>
+<div style="padding:14px 14px 18px;display:flex;flex-direction:column;gap:14px;min-height:600px;">
+<div>
+<div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--muted);font-weight:700;letter-spacing:.12em;">SESSION LOG</div>
+<div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:24px;color:var(--text);margin-top:3px;">{{ viewD.dayFull }}</div>
+<div style="display:flex;gap:4px;margin-top:8px;">
+<div style="width:16px;height:8px;border-radius:3px;background:var(--accent);"></div>
+<div style="width:16px;height:8px;border-radius:3px;background:var(--line);"></div>
+<div style="width:16px;height:8px;border-radius:3px;background:var(--line);"></div>
+<div style="width:16px;height:8px;border-radius:3px;background:var(--line);"></div>
+<div style="width:16px;height:8px;border-radius:3px;background:var(--line);"></div>
+<div style="width:16px;height:8px;border-radius:3px;background:var(--line);"></div>
+<div style="width:16px;height:8px;border-radius:3px;background:var(--line);"></div>
+</div>
+</div>
+<div style="display:flex;gap:8px;">
+<sc-for list="{{ viewD.tabs }}" as="tab" hint-placeholder-count="3">
+<sc-if value="{{ tab.active }}" hint-placeholder-val="{{ false }}"><span style="flex:1;text-align:center;background:var(--accent);color:var(--accent-ink);font-family:'JetBrains Mono',monospace;font-weight:700;font-size:11px;letter-spacing:.06em;padding:8px 0;border-radius:8px;cursor:pointer;display:block;">{{ tab.label }}</span></sc-if>
+<sc-if value="{{ tab.notActive }}" hint-placeholder-val="{{ true }}"><span onClick="{{ tab.onClick }}" style="flex:1;text-align:center;background:var(--card);color:var(--muted);font-family:'JetBrains Mono',monospace;font-weight:700;font-size:11px;letter-spacing:.06em;padding:8px 0;border-radius:8px;cursor:pointer;display:block;">{{ tab.label }}</span></sc-if>
+</sc-for>
+</div>
+<div style="display:flex;gap:8px;">
+<div style="flex:1;background:var(--card);border-radius:12px;padding:10px 12px;">
+<div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);font-weight:700;letter-spacing:.08em;">COMPLETED</div>
+<div style="font-family:'JetBrains Mono',monospace;font-size:18px;color:var(--text);font-weight:700;margin-top:3px;">{{ viewD.completedText }}</div>
+</div>
+<div style="flex:1;background:var(--card);border-radius:12px;padding:10px 12px;">
+<div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);font-weight:700;letter-spacing:.08em;">VOLUME</div>
+<div style="font-family:'JetBrains Mono',monospace;font-size:18px;color:var(--accent);font-weight:700;margin-top:3px;">{{ viewD.volumeText }}</div>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;">
+<sc-for list="{{ viewD.items }}" as="item" hint-placeholder-count="6">
+<div onClick="{{ item.onToggle }}" style="display:flex;align-items:center;gap:12px;padding:10px 2px;border-bottom:1px solid var(--line);cursor:pointer;opacity:{{ item.rowOpacity }};">
+<div style="width:26px;height:26px;border-radius:8px;border:1.5px solid {{ item.checkBorder }};background:{{ item.checkBg }};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+<sc-if value="{{ item.done }}" hint-placeholder-val="{{ false }}"><span style="color:var(--bg);font-size:12px;font-weight:900;">✓</span></sc-if>
+<sc-if value="{{ item.notDone }}" hint-placeholder-val="{{ true }}"><span style="font-family:'JetBrains Mono',monospace;color:var(--muted);font-size:10px;font-weight:700;">{{ item.numberText }}</span></sc-if>
+</div>
+<div style="flex:1;">
+<div style="font-size:13.5px;font-weight:800;color:var(--text);">{{ item.name }}</div>
+<div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--muted);font-weight:600;letter-spacing:.04em;margin-top:2px;text-transform:uppercase;">{{ item.muscle }}</div>
+</div>
+<div style="text-align:right;">
+<div style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--accent);">{{ item.setsRepsText }}</div>
+<div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);margin-top:2px;">{{ item.lastText }}</div>
+</div>
+</div>
+</sc-for>
+</div>
+<button style="border:2px solid var(--accent);background:transparent;color:var(--accent);font-family:'JetBrains Mono',monospace;font-weight:700;letter-spacing:.1em;padding:14px;border-radius:14px;text-transform:uppercase;cursor:pointer;font-size:12.5px;">Begin Session</button>
+<div style="display:flex;justify-content:space-around;padding:10px 4px 6px;border-top:1px solid var(--line);margin-top:2px;">
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:var(--accent);"></div><span style="font-size:10px;font-weight:800;color:var(--text);">Today</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:var(--line);"></div><span style="font-size:10px;font-weight:700;color:var(--muted);">Log</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:var(--line);"></div><span style="font-size:10px;font-weight:700;color:var(--muted);">Trends</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:var(--line);"></div><span style="font-size:10px;font-weight:700;color:var(--muted);">Profile</span></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+<div class="dv-subhead">Google Sync — full realistic flow</div>
+<div class="dv-opts">
+
+<div class="dv-opt" id="1e">
+<div class="dv-olabel"><a class="dv-oid" href="#1e">1e</a>Google sign-in</div>
+<div class="dv-card" style="background:transparent;border:none;box-shadow:none;overflow:visible;border-radius:0;">
+<div style="--bg:oklch(19% 0.006 55);--card:oklch(25% 0.012 50);--accent:oklch(64% 0.20 29);--accent-ink:oklch(13% 0.02 29);--good:oklch(62% 0.15 152);--text:oklch(96% 0.004 60);--muted:oklch(68% 0.014 55);--line:oklch(32% 0.012 50);width:296px;background:var(--bg);border-radius:40px;padding:10px;box-shadow:0 24px 60px -24px rgba(0,0,0,.55);font-family:'Nunito',sans-serif;">
+<div style="width:56px;height:5px;border-radius:3px;background:rgba(128,128,128,.35);margin:8px auto 2px;"></div>
+<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 14px 2px;font-size:12px;color:var(--text);font-weight:800;">
+<span>9:41</span>
+<div style="width:18px;height:10px;border:1.4px solid var(--text);border-radius:2px;position:relative;"><div style="position:absolute;top:1.5px;bottom:1.5px;right:2px;width:9px;background:var(--text);border-radius:1px;"></div></div>
+</div>
+<div style="padding:34px 26px 26px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:16px;min-height:600px;">
+<div style="width:64px;height:64px;border-radius:20px;background:var(--accent);display:flex;align-items:center;justify-content:center;margin-top:14px;">
+<div style="display:flex;align-items:center;gap:3px;">
+<div style="width:8px;height:20px;border-radius:2px;background:var(--accent-ink);"></div>
+<div style="width:20px;height:7px;border-radius:2px;background:var(--accent-ink);"></div>
+<div style="width:8px;height:20px;border-radius:2px;background:var(--accent-ink);"></div>
+</div>
+</div>
+<div>
+<div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:22px;color:var(--text);">Sync with Google</div>
+<div style="font-size:13px;color:var(--muted);font-weight:600;margin-top:8px;line-height:1.55;">Back up every workout to Google Drive so your history is safe on any device.</div>
+</div>
+<button onClick="{{ startSync }}" style="width:100%;display:flex;align-items:center;justify-content:center;gap:10px;background:#fff;border:none;border-radius:16px;padding:14px;font-family:'Nunito',sans-serif;font-weight:800;font-size:14px;color:#3c3c3c;cursor:pointer;margin-top:6px;">
+<span style="width:22px;height:22px;border-radius:50%;background:#f1f1f1;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;color:#5b5b5b;">G</span>
+Continue with Google
+</button>
+<sc-if value="{{ syncing }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:var(--muted);font-weight:700;">Connecting...</div></sc-if>
+<sc-if value="{{ notSyncing }}" hint-placeholder-val="{{ true }}"><div style="font-size:11.5px;color:var(--muted);font-weight:600;">Your data stays private — only you can access it.</div></sc-if>
+<div style="font-size:12.5px;color:var(--muted);font-weight:700;text-decoration:underline;margin-top:auto;cursor:pointer;">Continue without syncing</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="dv-opt" id="1f">
+<div class="dv-olabel"><a class="dv-oid" href="#1f">1f</a>Sync settings screen</div>
+<div class="dv-card" style="background:transparent;border:none;box-shadow:none;overflow:visible;border-radius:0;">
+<div style="--bg:oklch(19% 0.006 55);--card:oklch(25% 0.012 50);--accent:oklch(64% 0.20 29);--accent-ink:oklch(13% 0.02 29);--good:oklch(62% 0.15 152);--text:oklch(96% 0.004 60);--muted:oklch(68% 0.014 55);--line:oklch(32% 0.012 50);width:296px;background:var(--bg);border-radius:40px;padding:10px;box-shadow:0 24px 60px -24px rgba(0,0,0,.55);font-family:'Nunito',sans-serif;">
+<div style="width:56px;height:5px;border-radius:3px;background:rgba(128,128,128,.35);margin:8px auto 2px;"></div>
+<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 14px 2px;font-size:12px;color:var(--text);font-weight:800;">
+<span>9:41</span>
+<div style="width:18px;height:10px;border:1.4px solid var(--text);border-radius:2px;position:relative;"><div style="position:absolute;top:1.5px;bottom:1.5px;right:2px;width:9px;background:var(--text);border-radius:1px;"></div></div>
+</div>
+<div style="padding:16px 16px 20px;display:flex;flex-direction:column;gap:14px;min-height:600px;">
+<div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:21px;color:var(--text);">Google Sync</div>
+<div style="display:flex;align-items:center;gap:12px;background:var(--card);border-radius:18px;padding:14px;">
+<div style="width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:15px;color:var(--text);">Y</div>
+<div style="flex:1;">
+<div style="font-size:13.5px;font-weight:800;color:var(--text);">you@gmail.com</div>
+<div style="display:flex;align-items:center;gap:5px;margin-top:3px;"><div style="width:6px;height:6px;border-radius:50%;background:var(--good);"></div><span style="font-size:11px;color:var(--good);font-weight:700;">Connected</span></div>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:var(--card);border-radius:18px;padding:14px;">
+<div style="display:flex;justify-content:space-between;align-items:center;">
+<div>
+<div style="font-size:13px;font-weight:800;color:var(--text);">Last synced</div>
+<div style="font-size:11.5px;color:var(--muted);font-weight:600;margin-top:2px;">{{ syncLabel }}</div>
+</div>
+<button onClick="{{ startSync }}" style="display:flex;align-items:center;gap:7px;border:none;background:rgba(255,255,255,.08);color:var(--text);font-weight:800;font-size:12px;padding:9px 14px;border-radius:14px;cursor:pointer;">
+<sc-if value="{{ syncing }}" hint-placeholder-val="{{ false }}"><span style="width:12px;height:12px;border-radius:50%;border:2px solid var(--muted);border-top-color:var(--accent);display:inline-block;animation:{{ spinStyle }};"></span></sc-if>
+<sc-if value="{{ notSyncing }}" hint-placeholder-val="{{ true }}"><span style="width:8px;height:8px;border-radius:50%;background:var(--good);display:inline-block;"></span></sc-if>
+Sync now
+</button>
+</div>
+<div style="height:1px;background:var(--line);"></div>
+<div style="display:flex;justify-content:space-between;align-items:center;">
+<div style="font-size:13px;font-weight:800;color:var(--text);">Auto-sync on Wi-Fi only</div>
+<div onClick="{{ toggleWifi }}" style="width:44px;height:26px;border-radius:13px;background:{{ wifiTrackBg }};position:relative;cursor:pointer;flex-shrink:0;">
+<div style="width:20px;height:20px;border-radius:50%;background:#fff;position:absolute;top:3px;left:{{ wifiKnobLeft }};transition:left .15s;"></div>
+</div>
+</div>
+</div>
+<div style="background:var(--card);border-radius:18px;padding:14px;">
+<div style="font-size:13px;font-weight:800;color:var(--text);">42 workouts backed up</div>
+<div style="font-size:11.5px;color:var(--muted);font-weight:600;margin-top:2px;">1.2 MB used in Google Drive</div>
+<div style="height:6px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden;margin-top:10px;">
+<div style="height:100%;width:38%;border-radius:4px;background:var(--accent);"></div>
+</div>
+</div>
+<div style="text-align:center;font-size:12px;color:oklch(65% 0.16 25);font-weight:700;margin-top:2px;cursor:pointer;">Disconnect Google account</div>
+<div style="display:flex;justify-content:space-around;padding:8px 4px 6px;border-top:1px solid var(--line);margin-top:auto;">
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:var(--line);"></div><span style="font-size:10px;font-weight:700;color:var(--muted);">Today</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:var(--line);"></div><span style="font-size:10px;font-weight:700;color:var(--muted);">Log</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:var(--line);"></div><span style="font-size:10px;font-weight:700;color:var(--muted);">Trends</span></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:var(--accent);"></div><span style="font-size:10px;font-weight:800;color:var(--text);">Profile</span></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+<p class="dv-next">Try next: flip the day tabs on <a class="dv-oid" href="#1a">1a</a>–<a class="dv-oid" href="#1d">1d</a> and tick a few sets · "build 1c as the real app with navigation" · "add Rest day + the B-variants for the full 6-day cycle"</p>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    day: { a: 'push', b: 'push', c: 'push', d: 'push' },
+    done: { a: {}, b: {}, c: {}, d: {} },
+    sync: { status: 'done', label: 'Synced 2 min ago' },
+    wifiOnly: true
+  };
+
+  dayMeta = {
+    push: { label: 'PUSH', full: 'Push Day', dur: '~55 min' },
+    pull: { label: 'PULL', full: 'Pull Day', dur: '~50 min' },
+    legs: { label: 'LEGS', full: 'Leg Day', dur: '~60 min' }
+  };
+
+  exercisesByDay = {
+    push: [
+      { name: 'Barbell Bench Press', muscle: 'Chest', sets: 4, reps: 8, lastVal: 60, lastUnit: 'kg' },
+      { name: 'Incline Dumbbell Press', muscle: 'Chest', sets: 3, reps: 10, lastVal: 22, lastUnit: 'kg' },
+      { name: 'Seated DB Shoulder Press', muscle: 'Shoulders', sets: 3, reps: 10, lastVal: 18, lastUnit: 'kg' },
+      { name: 'Cable Fly', muscle: 'Chest', sets: 3, reps: 12, lastVal: 15, lastUnit: 'kg' },
+      { name: 'Lateral Raise', muscle: 'Shoulders', sets: 3, reps: 15, lastVal: 10, lastUnit: 'kg' },
+      { name: 'Triceps Rope Pushdown', muscle: 'Triceps', sets: 3, reps: 12, lastVal: 25, lastUnit: 'kg' },
+      { name: 'Treadmill Incline Walk', muscle: 'Cardio', sets: 1, reps: 0, lastVal: 12, lastUnit: 'min' }
+    ],
+    pull: [
+      { name: 'Deadlift', muscle: 'Back', sets: 4, reps: 6, lastVal: 90, lastUnit: 'kg' },
+      { name: 'Lat Pulldown', muscle: 'Back', sets: 4, reps: 10, lastVal: 55, lastUnit: 'kg' },
+      { name: 'Seated Cable Row', muscle: 'Back', sets: 3, reps: 10, lastVal: 60, lastUnit: 'kg' },
+      { name: 'Dumbbell Shrug', muscle: 'Traps', sets: 3, reps: 12, lastVal: 20, lastUnit: 'kg' },
+      { name: 'Face Pull', muscle: 'Rear Delts', sets: 3, reps: 15, lastVal: 25, lastUnit: 'kg' },
+      { name: 'Barbell Curl', muscle: 'Biceps', sets: 3, reps: 12, lastVal: 30, lastUnit: 'kg' }
+    ],
+    legs: [
+      { name: 'Barbell Back Squat', muscle: 'Quads', sets: 4, reps: 8, lastVal: 80, lastUnit: 'kg' },
+      { name: 'Leg Press', muscle: 'Quads', sets: 3, reps: 12, lastVal: 140, lastUnit: 'kg' },
+      { name: 'Walking Lunge (DB)', muscle: 'Glutes', sets: 3, reps: 12, lastVal: 16, lastUnit: 'kg' },
+      { name: 'Leg Extension', muscle: 'Quads', sets: 3, reps: 15, lastVal: 45, lastUnit: 'kg' },
+      { name: 'Standing Calf Raise', muscle: 'Calves', sets: 4, reps: 15, lastVal: 60, lastUnit: 'kg' }
+    ]
+  };
+
+  setDay = (key, day) => {
+    this.setState(s => ({ day: { ...s.day, [key]: day } }));
+  };
+
+  toggle = (key, idx) => {
+    this.setState(s => {
+      const day = s.day[key];
+      const cur = (s.done[key] && s.done[key][day]) || {};
+      return { done: { ...s.done, [key]: { ...s.done[key], [day]: { ...cur, [idx]: !cur[idx] } } } };
+    });
+  };
+
+  startSync = () => {
+    this.setState({ sync: { status: 'syncing', label: 'Syncing...' } });
+    setTimeout(() => {
+      this.setState({ sync: { status: 'done', label: 'Synced just now' } });
+    }, 1300);
+  };
+
+  toggleWifi = () => {
+    this.setState(s => ({ wifiOnly: !s.wifiOnly }));
+  };
+
+  buildView = (key) => {
+    const day = this.state.day[key];
+    const meta = this.dayMeta[day];
+    const list = this.exercisesByDay[day];
+    const doneMap = (this.state.done[key] && this.state.done[key][day]) || {};
+    let doneCount = 0;
+    let volume = 0;
+    const items = list.map((ex, i) => {
+      const done = !!doneMap[i];
+      if (done) doneCount++;
+      if (done && ex.lastUnit === 'kg') volume += ex.sets * ex.reps * ex.lastVal;
+      const setsRepsText = ex.lastUnit === 'min' ? (ex.lastVal + ' min') : (ex.sets + ' \u00d7 ' + ex.reps);
+      const lastText = ex.lastUnit === 'min' ? 'Optional finisher' : ('Last ' + ex.lastVal + ' kg');
+      const numberText = (i + 1 < 10 ? '0' : '') + (i + 1);
+      return {
+        idx: i,
+        name: ex.name,
+        muscle: ex.muscle,
+        metaLine: ex.muscle + ' \u00b7 ' + lastText,
+        setsRepsText: setsRepsText,
+        lastText: lastText,
+        numberText: numberText,
+        done: done,
+        notDone: !done,
+        rowOpacity: done ? 0.5 : 1,
+        checkBg: done ? 'var(--good)' : 'transparent',
+        checkBorder: done ? 'var(--good)' : 'var(--line)',
+        onToggle: () => this.toggle(key, i)
+      };
+    });
+    const total = items.length;
+    const pct = total ? Math.round((doneCount / total) * 100) : 0;
+    const ringCirc = 188.5;
+    const tabs = ['push', 'pull', 'legs'].map((d) => {
+      const active = day === d;
+      return {
+        key: d,
+        label: this.dayMeta[d].label,
+        active: active,
+        notActive: !active,
+        onClick: () => this.setDay(key, d)
+      };
+    });
+    return {
+      day: day,
+      dayFull: meta.full,
+      subtitle: meta.dur + ' \u00b7 Slam Fitness',
+      items: items,
+      doneCount: doneCount,
+      total: total,
+      pct: pct,
+      progressLabel: doneCount + ' / ' + total + ' done',
+      doneShout: doneCount + ' OF ' + total + ' DONE',
+      completedText: doneCount + '/' + total,
+      volumeText: volume.toLocaleString() + ' kg',
+      ringCirc: ringCirc,
+      ringOffset: ringCirc * (1 - pct / 100),
+      tabs: tabs
+    };
+  };
+
+  renderVals() {
+    const sync = this.state.sync;
+    const syncing = sync.status === 'syncing';
+    const wifiOnly = this.state.wifiOnly;
+    return {
+      viewA: this.buildView('a'),
+      viewB: this.buildView('b'),
+      viewC: this.buildView('c'),
+      viewD: this.buildView('d'),
+      syncLabel: sync.label,
+      syncing: syncing,
+      notSyncing: !syncing,
+      spinStyle: syncing ? 'spin 0.9s linear infinite' : 'none',
+      startSync: this.startSync,
+      wifiOnly: wifiOnly,
+      wifiTrackBg: wifiOnly ? 'var(--accent)' : 'var(--line)',
+      wifiKnobLeft: wifiOnly ? '21px' : '3px',
+      toggleWifi: this.toggleWifi
+    };
+  }
+}
+</script>
+</body>
+</html>

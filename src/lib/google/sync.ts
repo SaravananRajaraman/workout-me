@@ -1,0 +1,150 @@
+import { findOrCreateSpreadsheet, getValues, updateValues } from './api';
+import type { BodyweightEntry, Session, UserProfile } from '../../state/types';
+import type { DayType, Slot } from '../../data/types';
+
+const FILE_TITLE = 'Slam PPL Data';
+const TAB_TITLES = ['Profile', 'Plan', 'Sessions', 'Bodyweight'];
+
+const SESSION_HEADER = ['id', 'date', 'dow', 'slot', 'type', 'exerciseId', 'name', 'muscle', 'setIndex', 'weight', 'reps'];
+const BODYWEIGHT_HEADER = ['date', 'kg'];
+
+export interface RemoteState {
+  profileMap: Record<string, string>;
+  plan: Partial<Record<Slot, string[]>>;
+  mirror: Partial<Record<DayType, boolean>>;
+  sessions: Session[];
+  bodyweight: BodyweightEntry[];
+}
+
+export async function ensureSpreadsheet(accessToken: string): Promise<string> {
+  return findOrCreateSpreadsheet(accessToken, FILE_TITLE, TAB_TITLES);
+}
+
+export async function pushAll(
+  accessToken: string,
+  spreadsheetId: string,
+  data: {
+    user: UserProfile | null;
+    theme: string;
+    plan: Partial<Record<Slot, string[]>>;
+    mirror: Partial<Record<DayType, boolean>>;
+    sessions: Session[];
+    bodyweight: BodyweightEntry[];
+  },
+): Promise<void> {
+  const u = data.user;
+  const profileRows = [
+    ['key', 'value'],
+    ['name', u?.name ?? ''],
+    ['gym', u?.gym ?? ''],
+    ['heightCm', String(u?.heightCm ?? '')],
+    ['weightKg', String(u?.weightKg ?? '')],
+    ['targetKg', String(u?.targetKg ?? '')],
+    ['goal', u?.goal ?? ''],
+    ['units', u?.units ?? 'kg'],
+    ['theme', data.theme],
+  ];
+  const planRows = [
+    ['key', 'value'],
+    ['plan_json', JSON.stringify(data.plan ?? {})],
+    ['mirror_json', JSON.stringify(data.mirror ?? {})],
+  ];
+  const sessionRows: (string | number)[][] = [SESSION_HEADER];
+  data.sessions.forEach((s) => {
+    s.items.forEach((item) => {
+      item.sets.forEach((set, i) => {
+        sessionRows.push([s.id, s.date, s.dow, s.slot, s.type, item.exerciseId, item.name, item.muscle, i + 1, set.w, set.r]);
+      });
+    });
+  });
+  const bwRows: (string | number)[][] = [BODYWEIGHT_HEADER];
+  data.bodyweight.forEach((b) => bwRows.push([b.date, b.kg]));
+
+  await Promise.all([
+    updateValues(accessToken, spreadsheetId, 'Profile!A1:B9', profileRows),
+    updateValues(accessToken, spreadsheetId, 'Plan!A1:B3', planRows),
+    updateValues(accessToken, spreadsheetId, `Sessions!A1:K${sessionRows.length + 1}`, sessionRows),
+    updateValues(accessToken, spreadsheetId, `Bodyweight!A1:B${bwRows.length + 1}`, bwRows),
+  ]);
+}
+
+export async function pullAll(accessToken: string, spreadsheetId: string): Promise<RemoteState> {
+  const [profileRows, planRows, sessionRows, bwRows] = await Promise.all([
+    getValues(accessToken, spreadsheetId, 'Profile!A1:B9'),
+    getValues(accessToken, spreadsheetId, 'Plan!A1:B3'),
+    getValues(accessToken, spreadsheetId, 'Sessions!A1:K200000'),
+    getValues(accessToken, spreadsheetId, 'Bodyweight!A1:B20000'),
+  ]);
+
+  const profileMap: Record<string, string> = {};
+  profileRows.slice(1).forEach(([k, v]) => {
+    if (k) profileMap[k] = v ?? '';
+  });
+
+  let plan: Partial<Record<Slot, string[]>> = {};
+  let mirror: Partial<Record<DayType, boolean>> = {};
+  planRows.slice(1).forEach(([k, v]) => {
+    if (k === 'plan_json' && v) {
+      try {
+        plan = JSON.parse(v);
+      } catch {
+        /* ignore malformed remote data */
+      }
+    }
+    if (k === 'mirror_json' && v) {
+      try {
+        mirror = JSON.parse(v);
+      } catch {
+        /* ignore malformed remote data */
+      }
+    }
+  });
+
+  const sessionsById = new Map<string, Session>();
+  sessionRows.slice(1).forEach((row) => {
+    const [id, date, dowStr, slot, type, exerciseId, name, muscle, setIdxStr, wStr, rStr] = row;
+    if (!id) return;
+    let session = sessionsById.get(id);
+    if (!session) {
+      session = {
+        id,
+        date,
+        dow: Number(dowStr) || 0,
+        slot: slot as Slot,
+        type: type as DayType,
+        items: [],
+        totalVolume: 0,
+      };
+      sessionsById.set(id, session);
+    }
+    let item = session.items.find((i) => i.exerciseId === exerciseId);
+    if (!item) {
+      item = { exerciseId, name, muscle, sets: [], volume: 0 };
+      session.items.push(item);
+    }
+    const w = Number(wStr) || 0;
+    const r = Number(rStr) || 0;
+    const setIdx = Number(setIdxStr) || item.sets.length + 1;
+    item.sets[setIdx - 1] = { w, r };
+    item.volume = item.sets.reduce((sum, s) => sum + (s ? s.w * s.r : 0), 0);
+  });
+  sessionsById.forEach((s) => {
+    s.totalVolume = s.items.reduce((sum, i) => sum + i.volume, 0);
+    s.items.forEach((i) => {
+      i.sets = i.sets.filter(Boolean);
+    });
+  });
+
+  const bodyweight: BodyweightEntry[] = bwRows
+    .slice(1)
+    .filter((row) => row[0])
+    .map((row) => ({ date: row[0], kg: Number(row[1]) || 0 }));
+
+  return {
+    profileMap,
+    plan,
+    mirror,
+    sessions: Array.from(sessionsById.values()),
+    bodyweight,
+  };
+}

@@ -1,0 +1,93 @@
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  --hero1: #f2543d;
+  --hero2: #d63d4a;
+}
+
+:root[data-theme='light'] {
+  --bg: #faf7f3;
+  --card: #ffffff;
+  --card2: #f4ede9;
+  --text: #241c17;
+  --muted: #7c7069;
+  --line: #ece3dc;
+  --shadow: rgba(40, 25, 15, 0.12);
+  --good: #2fa565;
+}
+
+:root[data-theme='dark'] {
+  --bg: #161210;
+  --card: #221b16;
+  --card2: #2c241d;
+  --text: #f5efe9;
+  --muted: #a99a8f;
+  --line: #332a23;
+  --shadow: rgba(0, 0, 0, 0.6);
+  --good: #2fa565;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #e7e1da;
+}
+
+:root[data-theme='dark'] body {
+  background: #12100e;
+}
+
+body {
+  font-family: 'Nunito', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  height: 100%;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes popIn {
+  0% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes riseIn {
+  0% {
+    transform: translateY(14px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.scr::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.scr {
+  scrollbar-width: none;
+}
+
+button,
+input {
+  font: inherit;
+}

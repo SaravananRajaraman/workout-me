@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f2543d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Slam PPL">
+<meta name="application-name" content="Slam PPL">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=JetBrains+Mono:wght@600;700&family=Nunito:wght@400;600;700;800;900&display=swap">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#e7e1da;font-family:'Nunito',sans-serif;-webkit-font-smoothing:antialiased}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes popIn{0%{transform:scale(.9);opacity:0}100%{transform:scale(1);opacity:1}}
+@keyframes riseIn{0%{transform:translateY(14px);opacity:0}100%{transform:translateY(0);opacity:1}}
+.scr::-webkit-scrollbar{width:0;height:0}
+.scr{scrollbar-width:none}
+</style>
+</helmet>
+<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:34px 16px;background:radial-gradient(120% 90% at 50% 0%, #f0ebe4 0%, #e2dcd4 60%, #d7d0c7 100%);">
+<div style="width:322px;background:#0c0a09;border-radius:46px;padding:11px;box-shadow:0 40px 90px -30px rgba(30,15,8,.55),0 0 0 2px rgba(255,255,255,.04) inset;position:relative;">
+<div class="scr" style="position:relative;width:300px;height:664px;border-radius:36px;overflow:hidden;display:flex;flex-direction:column;background:var(--bg,#faf7f3);{{ themeVars }}">
+
+<div style="display:flex;justify-content:space-between;align-items:center;padding:11px 20px 5px;flex-shrink:0;">
+<span style="font-size:12.5px;font-weight:800;color:var(--text,#241c17);">9:41</span>
+<div style="display:flex;align-items:center;gap:5px;">
+<svg width="15" height="11" viewBox="0 0 15 11" fill="none"><rect x="0" y="7" width="2.4" height="4" rx="1" fill="var(--text,#241c17)"/><rect x="3.6" y="5" width="2.4" height="6" rx="1" fill="var(--text,#241c17)"/><rect x="7.2" y="2.6" width="2.4" height="8.4" rx="1" fill="var(--text,#241c17)"/><rect x="10.8" y="0" width="2.4" height="11" rx="1" fill="var(--text,#241c17)" opacity=".35"/></svg>
+<div style="width:19px;height:10px;border:1.4px solid var(--text,#241c17);border-radius:3px;position:relative;opacity:.9;"><div style="position:absolute;top:1.5px;bottom:1.5px;left:1.5px;width:11px;background:var(--text,#241c17);border-radius:1px;"></div></div>
+</div>
+</div>
+
+<div class="scr" style="flex:1;min-height:0;overflow-y:auto;">
+
+<sc-if value="{{ showSignin }}" hint-placeholder-val="{{ false }}">
+<div style="padding:30px 26px 26px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:15px;min-height:560px;">
+<div style="width:70px;height:70px;border-radius:22px;background:linear-gradient(135deg,var(--hero1,#f2543d),var(--hero2,#d63d4a));display:flex;align-items:center;justify-content:center;margin-top:26px;box-shadow:0 18px 34px -14px var(--hero1,#f2543d);">
+<div style="display:flex;align-items:center;gap:3px;">
+<div style="width:8px;height:24px;border-radius:2px;background:#fff;"></div><div style="width:22px;height:8px;border-radius:2px;background:#fff;"></div><div style="width:8px;height:24px;border-radius:2px;background:#fff;"></div>
+</div>
+</div>
+<div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:26px;color:var(--text,#241c17);margin-top:4px;">Slam PPL</div>
+<div style="font-size:13.5px;color:var(--muted,#7c7069);font-weight:700;margin-top:-8px;">Push · Pull · Legs — every rep counts</div>
+<div style="font-size:13px;color:var(--muted,#7c7069);font-weight:600;line-height:1.6;max-width:230px;margin-top:4px;">Sign in to back up every workout to Google Drive and pick up on any device.</div>
+<button onClick="{{ signIn }}" style="width:100%;display:flex;align-items:center;justify-content:center;gap:11px;background:#fff;border:1px solid #e4ded7;border-radius:16px;padding:14px;font-family:'Nunito',sans-serif;font-weight:800;font-size:14px;color:#3c3c3c;cursor:pointer;margin-top:10px;box-shadow:0 6px 16px -8px rgba(0,0,0,.2);">
+<svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.6l6.7-6.7C35.6 2.4 30.2 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.8 6.1C12.3 13.2 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.1 24.6c0-1.6-.1-3.1-.4-4.6H24v9.1h12.4c-.5 2.9-2.1 5.3-4.6 7l7.1 5.5c4.2-3.9 6.6-9.6 6.6-16.5z"/><path fill="#FBBC05" d="M10.4 28.3c-.5-1.4-.8-2.9-.8-4.3s.3-3 .8-4.3l-7.8-6.1C1 16.7 0 20.2 0 24s1 7.3 2.6 10.4l7.8-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.1-5.5c-2 1.3-4.5 2.1-8.8 2.1-6.3 0-11.7-3.7-13.6-9.1l-7.8 6.1C6.5 42.6 14.6 48 24 48z"/></svg>
+Continue with Google
+</button>
+<div onClick="{{ skipSignin }}" style="font-size:13px;color:var(--muted,#7c7069);font-weight:800;text-decoration:underline;margin-top:auto;cursor:pointer;">Continue without syncing</div>
+<div style="font-size:11px;color:var(--muted,#7c7069);font-weight:600;opacity:.8;">Your data stays private — only you can see it.</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ showToday }}" hint-placeholder-val="{{ true }}">
+<div style="padding:6px 14px 20px;display:flex;flex-direction:column;gap:15px;">
+<div style="border-radius:24px;padding:17px 18px 18px;background:linear-gradient(135deg,var(--hero1,#f2543d),var(--hero2,#d63d4a));box-shadow:0 18px 34px -18px var(--hero1,#f2543d);position:relative;overflow:hidden;">
+<div style="position:absolute;top:-30px;right:-20px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.09);"></div>
+<div style="display:flex;justify-content:space-between;align-items:center;position:relative;">
+<span style="font-size:11px;font-weight:800;color:rgba(255,255,255,.85);letter-spacing:.06em;text-transform:uppercase;">Week 3 · Slam Fitness</span>
+<div onClick="{{ goSync }}" style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.2);padding:5px 9px;border-radius:13px;cursor:pointer;">
+<div style="width:6px;height:6px;border-radius:50%;background:#fff;"></div><span style="font-size:9.5px;color:#fff;font-weight:800;">{{ syncShort }}</span>
+</div>
+</div>
+<div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:12px;position:relative;">
+<div>
+<div style="display:flex;align-items:center;gap:8px;">
+<div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:29px;color:#fff;line-height:1;">{{ today.dayName }}</div>
+<sc-if value="{{ today.showDayTag }}" hint-placeholder-val="{{ true }}"><span style="background:rgba(255,255,255,.22);color:#fff;font-size:10px;font-weight:800;padding:4px 9px;border-radius:9px;letter-spacing:.02em;white-space:nowrap;">{{ today.dayTag }}</span></sc-if>
+</div>
+<div style="font-size:12.5px;color:rgba(255,255,255,.88);font-weight:700;margin-top:5px;">{{ today.subtitle }}</div>
+</div>
+<div style="text-align:right;">
+<div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:22px;color:#fff;">{{ today.countText }}</div>
+<div style="font-size:10px;color:rgba(255,255,255,.8);font-weight:800;letter-spacing:.04em;">DONE</div>
+</div>
+</div>
+</div>
+
+<div style="display:flex;gap:6px;">
+<sc-for list="{{ today.rail }}" as="r" hint-placeholder-count="7">
+<sc-if value="{{ r.active }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:9px 0 7px;border-radius:14px;background:linear-gradient(135deg,var(--hero1,#f2543d),var(--hero2,#d63d4a));cursor:pointer;box-shadow:0 8px 16px -8px var(--hero1,#f2543d);">
+<span style="font-size:9px;font-weight:800;color:rgba(255,255,255,.8);">{{ r.dow }}</span>
+<span style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:14px;color:#fff;">{{ r.letter }}</span>
+</div>
+</sc-if>
+<sc-if value="{{ r.inactive }}" hint-placeholder-val="{{ true }}">
+<div onClick="{{ r.onClick }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:9px 0 7px;border-radius:14px;background:var(--card,#fff);cursor:pointer;border:1px solid var(--line,#ece3dc);">
+<span style="font-size:9px;font-weight:800;color:var(--muted,#7c7069);">{{ r.dow }}</span>
+<span style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:14px;color:{{ r.letterColor }};">{{ r.letter }}</span>
+</div>
+</sc-if>
+</sc-for>
+</div>
+
+<sc-if value="{{ today.isRest }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--card,#fff);border-radius:20px;padding:26px 22px;text-align:center;box-shadow:0 8px 22px -14px var(--shadow,rgba(40,25,15,.1));border:1px solid var(--line,#ece3dc);margin-top:2px;">
+<div style="font-size:40px;">🛌</div>
+<div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:21px;color:var(--text,#241c17);margin-top:6px;">Rest & Recover</div>
+<div style="font-size:13px;color:var(--muted,#7c7069);font-weight:600;line-height:1.6;margin-top:8px;">Muscle grows on rest days. Keep protein up, hydrate, and get 7–8 h sleep. Next up: <b style="color:var(--text,#241c17);">Push Day</b> tomorrow.</div>
+<button onClick="{{ goProfile }}" style="margin-top:16px;border:none;background:var(--card2,#f4ede9);color:var(--hero1,#f2543d);font-weight:800;font-size:13px;padding:12px 20px;border-radius:14px;cursor:pointer;">Log today's body weight</button>
+</div>
+</sc-if>
+
+<sc-if value="{{ today.hasItems }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:13px;">
+<sc-for list="{{ today.items }}" as="item" hint-placeholder-count="6">
+<div onClick="{{ item.onClick }}" style="background:var(--card,#fff);border-radius:18px;overflow:hidden;box-shadow:0 8px 20px -14px var(--shadow,rgba(40,25,15,.1));border:1px solid var(--line,#ece3dc);cursor:pointer;">
+<div style="position:relative;height:118px;">
+<div role="img" aria-label="{{ item.name }}" style="width:100%;height:100%;background-color:var(--card2,#f4ede9);background-image:url({{ item.img }});background-size:cover;background-position:center;filter:saturate(1.05);"></div>
+<div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.05) 30%,rgba(0,0,0,.72) 100%);"></div>
+<span style="position:absolute;top:10px;left:10px;background:rgba(255,255,255,.92);color:var(--hero1,#f2543d);font-size:9.5px;font-weight:800;padding:4px 9px;border-radius:9px;letter-spacing:.03em;text-transform:uppercase;">{{ item.muscle }}</span>
+<sc-if value="{{ item.done }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;top:9px;right:10px;width:26px;height:26px;border-radius:50%;background:var(--good,#2fa565);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 10px rgba(0,0,0,.25);"><span style="color:#fff;font-size:14px;font-weight:900;">✓</span></div>
+</sc-if>
+<div style="position:absolute;left:12px;right:12px;bottom:9px;display:flex;justify-content:space-between;align-items:flex-end;">
+<span style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:16.5px;color:#fff;line-height:1.1;max-width:150px;text-shadow:0 1px 6px rgba(0,0,0,.4);">{{ item.name }}</span>
+<span style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:15px;color:#fff;background:rgba(255,255,255,.16);backdrop-filter:blur(4px);padding:3px 9px;border-radius:10px;white-space:nowrap;">{{ item.setsReps }}</span>
+</div>
+</div>
+<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;">
+<span style="font-size:11.5px;color:var(--muted,#7c7069);font-weight:700;">{{ item.metaLine }}</span>
+<span style="font-size:11.5px;color:var(--hero1,#f2543d);font-weight:800;">{{ item.actionText }} ›</span>
+</div>
+</div>
+</sc-for>
+<button onClick="{{ startFirst }}" style="border:none;background:linear-gradient(135deg,var(--hero1,#f2543d),var(--hero2,#d63d4a));color:#fff;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:16px;padding:16px;border-radius:18px;cursor:pointer;box-shadow:0 14px 26px -12px var(--hero1,#f2543d);margin-top:2px;">{{ today.ctaText }}</button>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ showExercise }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;">
+<div style="position:relative;height:186px;">
+<div role="img" aria-label="{{ ex.name }}" style="width:100%;height:100%;background-color:var(--card2,#f4ede9);background-image:url({{ ex.img }});background-size:cover;background-position:center;"></div>
+<div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.28) 0%,rgba(0,0,0,.05) 40%,rgba(0,0,0,.66) 100%);"></div>
+<div onClick="{{ back }}" style="position:absolute;top:12px;left:12px;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.92);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,.2);">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#241c17" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+</div>
+<span style="position:absolute;top:16px;right:14px;background:rgba(255,255,255,.92);color:var(--hero1,#f2543d);font-size:10px;font-weight:800;padding:5px 11px;border-radius:11px;text-transform:uppercase;letter-spacing:.03em;">{{ ex.muscle }}</span>
+<div style="position:absolute;left:16px;right:16px;bottom:12px;">
+<div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:23px;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.5);">{{ ex.name }}</div>
+</div>
+</div>
+<div style="padding:16px 16px 20px;display:flex;flex-direction:column;gap:14px;">
+<div style="display:flex;gap:10px;align-items:flex-start;background:var(--card2,#f4ede9);border-radius:14px;padding:11px 13px;">
+<span style="font-size:15px;">💡</span>
+<span style="font-size:12.5px;color:var(--text,#241c17);font-weight:600;line-height:1.5;">{{ ex.tip }}</span>
+</div>
+
+<sc-if value="{{ ex.hasSwaps }}" hint-placeholder-val="{{ false }}">
+<div>
+<div style="display:flex;align-items:center;gap:7px;margin-bottom:9px;">
+<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--hero1,#f2543d)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>
+<span style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:14px;color:var(--text,#241c17);">Swap exercise</span>
+<span style="font-size:10.5px;color:var(--muted,#7c7069);font-weight:700;">same muscle</span>
+</div>
+<div class="scr" style="display:flex;gap:9px;overflow-x:auto;padding-bottom:3px;">
+<sc-for list="{{ ex.swaps }}" as="sw" hint-placeholder-count="3">
+<div onClick="{{ sw.onPick }}" style="flex:none;width:96px;cursor:pointer;">
+<div style="position:relative;height:66px;border-radius:13px;overflow:hidden;border:2.5px solid {{ sw.ring }};">
+<div role="img" aria-label="{{ sw.name }}" style="width:100%;height:100%;background-color:var(--card2,#f4ede9);background-image:url({{ sw.img }});background-size:cover;background-position:center;"></div>
+<sc-if value="{{ sw.active }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;top:4px;right:4px;width:18px;height:18px;border-radius:50%;background:var(--hero1,#f2543d);display:flex;align-items:center;justify-content:center;"><span style="color:#fff;font-size:10px;font-weight:900;">✓</span></div></sc-if>
+</div>
+<div style="font-size:10.5px;font-weight:800;color:{{ sw.nameColor }};line-height:1.2;margin-top:5px;">{{ sw.name }}</div>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ ex.isTime }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--card,#fff);border:1px solid var(--line,#ece3dc);border-radius:18px;padding:22px;text-align:center;box-shadow:0 8px 20px -14px var(--shadow,rgba(40,25,15,.1));">
+<div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:40px;color:var(--text,#241c17);">{{ ex.timeText }}</div>
+<div style="font-size:12.5px;color:var(--muted,#7c7069);font-weight:700;margin-top:2px;">at 12% incline · fat-burn pace</div>
+<button onClick="{{ ex.onTimeToggle }}" style="margin-top:16px;width:100%;border:none;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:15px;padding:14px;border-radius:15px;cursor:pointer;background:{{ ex.timeBtnBg }};color:{{ ex.timeBtnColor }};">{{ ex.timeBtnText }}</button>
+</div>
+</sc-if>
+
+<sc-if value="{{ ex.hasSets }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:10px;">
+<div style="display:flex;justify-content:space-between;align-items:center;">
+<span style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:15px;color:var(--text,#241c17);">Log your sets</span>
+<span style="font-size:11.5px;color:var(--muted,#7c7069);font-weight:700;">Target {{ ex.targetReps }} reps</span>
+</div>
+<sc-for list="{{ ex.sets }}" as="s" hint-placeholder-count="4">
+<div style="background:var(--card,#fff);border:1px solid {{ s.borderColor }};border-radius:16px;padding:11px 12px;display:flex;flex-direction:column;gap:10px;box-shadow:0 6px 16px -14px var(--shadow,rgba(40,25,15,.1));">
+<div style="display:flex;justify-content:space-between;align-items:center;">
+<div style="display:flex;align-items:center;gap:9px;">
+<div style="width:24px;height:24px;border-radius:8px;background:var(--card2,#f4ede9);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:11px;color:var(--muted,#7c7069);">{{ s.n }}</div>
+<span style="font-size:12.5px;font-weight:800;color:var(--muted,#7c7069);">Set {{ s.n }}</span>
+</div>
+<div onClick="{{ s.onToggle }}" style="width:28px;height:28px;border-radius:50%;border:2px solid {{ s.checkBorder }};background:{{ s.checkBg }};display:flex;align-items:center;justify-content:center;cursor:pointer;">
+<sc-if value="{{ s.done }}" hint-placeholder-val="{{ false }}"><span style="color:#fff;font-size:13px;font-weight:900;">✓</span></sc-if>
+</div>
+</div>
+<div style="display:flex;gap:8px;">
+<div style="flex:1;background:var(--card2,#f4ede9);border-radius:12px;padding:7px 8px;">
+<div style="font-size:9px;font-weight:800;color:var(--muted,#7c7069);text-transform:uppercase;letter-spacing:.05em;text-align:center;">Weight</div>
+<div style="display:flex;align-items:center;justify-content:space-between;margin-top:3px;">
+<div onClick="{{ s.onWm }}" style="width:26px;height:26px;border-radius:9px;background:var(--card,#fff);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;color:var(--text,#241c17);cursor:pointer;flex-shrink:0;">−</div>
+<span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:14px;color:var(--text,#241c17);">{{ s.wText }}</span>
+<div onClick="{{ s.onWp }}" style="width:26px;height:26px;border-radius:9px;background:var(--card,#fff);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;color:var(--text,#241c17);cursor:pointer;flex-shrink:0;">+</div>
+</div>
+</div>
+<div style="flex:1;background:var(--card2,#f4ede9);border-radius:12px;padding:7px 8px;">
+<div style="font-size:9px;font-weight:800;color:var(--muted,#7c7069);text-transform:uppercase;letter-spacing:.05em;text-align:center;">Reps</div>
+<div style="display:flex;align-items:center;justify-content:space-between;margin-top:3px;">
+<div onClick="{{ s.onRm }}" style="width:26px;height:26px;border-radius:9px;background:var(--card,#fff);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;color:var(--text,#241c17);cursor:pointer;flex-shrink:0;">−</div>
+<span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:14px;color:var(--text,#241c17);">{{ s.rText }}</span>
+<div onClick="{{ s.onRp }}" style="width:26px;height:26px;border-radius:9px;background:var(--card,#fff);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;color:var(--text,#241c17);cursor:pointer;flex-shrink:0;">+</div>
+</div>
+</div>
+</div>
+</div>
+</sc-for>
+<button onClick="{{ ex.onRest }}" style="border:2px solid var(--hero1,#f2543d);background:transparent;color:var(--hero1,#f2543d);font-family:'Baloo 2',sans-serif;font-weight:800;font-size:14px;padding:13px;border-radius:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">⏱ Rest timer · 90s</button>
+</div>
+</sc-if>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ showProgress }}" hint-placeholder-val="{{ false }}">
+<div style="padding:6px 16px 20px;display:flex;flex-direction:column;gap:14px;">
+<div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:24px;color:var(--text,#241c17);margin-top:4px;">Progress</div>
+
+<div style="background:var(--card,#fff);border:1px solid var(--line,#ece3dc);border-radius:20px;padding:16px;box-shadow:0 8px 22px -16px var(--shadow,rgba(40,25,15,.1));">
+<div style="display:flex;justify-content:space-between;align-items:flex-start;">
+<div>
+<div style="font-size:11.5px;color:var(--muted,#7c7069);font-weight:800;text-transform:uppercase;letter-spacing:.05em;">Body weight</div>
+<div style="display:flex;align-items:baseline;gap:7px;margin-top:3px;"><span style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:28px;color:var(--text,#241c17);">{{ prog.bwCurrent }}</span><span style="font-size:12px;font-weight:800;color:var(--good,#2fa565);">{{ prog.bwDelta }}</span></div>
+</div>
+<div style="text-align:right;"><div style="font-size:10.5px;color:var(--muted,#7c7069);font-weight:700;">Goal</div><div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:16px;color:var(--text,#241c17);">{{ prog.bwGoal }}</div></div>
+</div>
+<svg width="100%" height="106" viewBox="0 0 248 106" preserveAspectRatio="none" style="margin-top:8px;">
+<defs><linearGradient id="bwg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--hero1,#f2543d)" stop-opacity="0.28"/><stop offset="1" stop-color="var(--hero1,#f2543d)" stop-opacity="0"/></linearGradient></defs>
+<path d="{{ prog.bwArea }}" fill="url(#bwg)"></path>
+<polyline points="{{ prog.bwLine }}" fill="none" stroke="var(--hero1,#f2543d)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></polyline>
+<circle cx="{{ prog.bwDotX }}" cy="{{ prog.bwDotY }}" r="4.5" fill="var(--hero1,#f2543d)" stroke="var(--card,#fff)" stroke-width="2.5"></circle>
+</svg>
+<div style="display:flex;justify-content:space-between;font-size:9.5px;color:var(--muted,#7c7069);font-weight:700;margin-top:2px;"><span>8 wks ago</span><span>Now</span></div>
+</div>
+
+<div style="background:var(--card,#fff);border:1px solid var(--line,#ece3dc);border-radius:20px;padding:16px;box-shadow:0 8px 22px -16px var(--shadow,rgba(40,25,15,.1));">
+<div style="display:flex;justify-content:space-between;align-items:center;">
+<div style="font-size:11.5px;color:var(--muted,#7c7069);font-weight:800;text-transform:uppercase;letter-spacing:.05em;">Consistency</div>
+<div style="display:flex;align-items:center;gap:5px;"><span style="font-size:15px;">🔥</span><span style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:17px;color:var(--hero1,#f2543d);">{{ prog.streak }}</span><span style="font-size:11px;color:var(--muted,#7c7069);font-weight:800;">days</span></div>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:12px;width:100%;">
+<sc-for list="{{ prog.dots }}" as="d" hint-placeholder-count="35">
+<div style="width:23px;height:23px;border-radius:7px;background:{{ d.bg }};"></div>
+</sc-for>
+</div>
+<div style="font-size:11.5px;color:var(--muted,#7c7069);font-weight:700;margin-top:11px;">This week <b style="color:var(--text,#241c17);">4 of 6</b> sessions · last 5 weeks</div>
+</div>
+
+<div style="background:var(--card,#fff);border:1px solid var(--line,#ece3dc);border-radius:20px;padding:16px;box-shadow:0 8px 22px -16px var(--shadow,rgba(40,25,15,.1));">
+<div style="font-size:11.5px;color:var(--muted,#7c7069);font-weight:800;text-transform:uppercase;letter-spacing:.05em;">Weekly volume</div>
+<div style="display:flex;align-items:flex-end;justify-content:space-between;gap:6px;height:92px;margin-top:12px;">
+<sc-for list="{{ prog.bars }}" as="b" hint-placeholder-count="8">
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:5px;">
+<div style="width:100%;border-radius:6px 6px 3px 3px;height:{{ b.h }};background:{{ b.bg }};"></div>
+</div>
+</sc-for>
+</div>
+<div style="display:flex;justify-content:space-between;font-size:9px;color:var(--muted,#7c7069);font-weight:700;margin-top:6px;"><span>W1</span><span>W8 · {{ prog.volLast }}</span></div>
+</div>
+
+<div style="background:var(--card,#fff);border:1px solid var(--line,#ece3dc);border-radius:20px;padding:16px 16px 6px;box-shadow:0 8px 22px -16px var(--shadow,rgba(40,25,15,.1));">
+<div style="font-size:11.5px;color:var(--muted,#7c7069);font-weight:800;text-transform:uppercase;letter-spacing:.05em;">Personal records</div>
+<sc-for list="{{ prog.prs }}" as="p" hint-placeholder-count="3">
+<div style="display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--line,#ece3dc);">
+<span style="font-size:13.5px;font-weight:800;color:var(--text,#241c17);">{{ p.name }}</span>
+<div style="text-align:right;"><span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:14px;color:var(--text,#241c17);">{{ p.val }}</span><div style="font-size:10px;color:var(--good,#2fa565);font-weight:800;">{{ p.sub }}</div></div>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ showProfile }}" hint-placeholder-val="{{ false }}">
+<div style="padding:6px 16px 20px;display:flex;flex-direction:column;gap:14px;">
+<div style="display:flex;align-items:center;gap:13px;margin-top:6px;">
+<div style="width:56px;height:56px;border-radius:18px;background:linear-gradient(135deg,var(--hero1,#f2543d),var(--hero2,#d63d4a));display:flex;align-items:center;justify-content:center;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:23px;color:#fff;box-shadow:0 10px 20px -10px var(--hero1,#f2543d);">{{ profile.initial }}</div>
+<div style="flex:1;">
+<div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:20px;color:var(--text,#241c17);">{{ profile.name }}</div>
+<div style="font-size:12px;color:var(--muted,#7c7069);font-weight:700;">{{ profile.gym }}</div>
+</div>
+<div onClick="{{ profile.onEdit }}" style="display:flex;align-items:center;gap:5px;background:var(--card,#fff);border:1px solid var(--line,#ece3dc);border-radius:13px;padding:8px 12px;cursor:pointer;box-shadow:0 4px 12px -8px var(--shadow,rgba(40,25,15,.15));">
+<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--hero1,#f2543d)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"></path></svg>
+<span style="font-size:12px;font-weight:800;color:var(--hero1,#f2543d);">Edit</span>
+</div>
+</div>
+
+<div style="background:linear-gradient(135deg,var(--hero1,#f2543d),var(--hero2,#d63d4a));border-radius:18px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 14px 26px -16px var(--hero1,#f2543d);">
+<div><div style="font-size:10.5px;color:rgba(255,255,255,.85);font-weight:800;text-transform:uppercase;letter-spacing:.05em;">Current goal</div><div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:17px;color:#fff;margin-top:2px;">{{ profile.goal }}</div></div>
+<span style="font-size:26px;">🎯</span>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+<div style="background:var(--card,#fff);border:1px solid var(--line,#ece3dc);border-radius:16px;padding:13px 14px;"><div style="font-size:10px;color:var(--muted,#7c7069);font-weight:800;text-transform:uppercase;">Height</div><div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:18px;color:var(--text,#241c17);margin-top:3px;">{{ profile.height }}</div></div>
+<div style="background:var(--card,#fff);border:1px solid var(--line,#ece3dc);border-radius:16px;padding:13px 14px;"><div style="font-size:10px;color:var(--muted,#7c7069);font-weight:800;text-transform:uppercase;">Weight</div><div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:18px;color:var(--text,#241c17);margin-top:3px;">{{ profile.weight }}</div></div>
+<div style="background:var(--card,#fff);border:1px solid var(--line,#ece3dc);border-radius:16px;padding:13px 14px;"><div style="font-size:10px;color:var(--muted,#7c7069);font-weight:800;text-transform:uppercase;">Target</div><div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:18px;color:var(--text,#241c17);margin-top:3px;">{{ profile.target }}</div></div>
+<div style="background:var(--card,#fff);border:1px solid var(--line,#ece3dc);border-radius:16px;padding:13px 14px;"><div style="font-size:10px;color:var(--muted,#7c7069);font-weight:800;text-transform:uppercase;">BMI</div><div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:18px;color:var(--text,#241c17);margin-top:3px;">{{ profile.bmi }} <span style="font-size:10px;color:var(--hero1,#f2543d);">{{ profile.bmiCat }}</span></div></div>
+</div>
+
+<div onClick="{{ profile.onConfig }}" style="display:flex;align-items:center;gap:13px;background:var(--card,#fff);border:1px solid var(--line,#ece3dc);border-radius:18px;padding:14px 16px;cursor:pointer;box-shadow:0 8px 22px -16px var(--shadow,rgba(40,25,15,.1));">
+<div style="width:44px;height:44px;border-radius:13px;background:linear-gradient(135deg,var(--hero1,#f2543d),var(--hero2,#d63d4a));display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5 17.5 17.5"></path><path d="m21 21-1-1"></path><path d="m3 3 1 1"></path><path d="m18 22 4-4"></path><path d="m2 6 4-4"></path><path d="m3 10 7-7"></path><path d="m14 21 7-7"></path></svg>
+</div>
+<div style="flex:1;">
+<div style="font-size:14px;font-weight:800;color:var(--text,#241c17);">Configure workouts</div>
+<div style="font-size:11.5px;color:var(--muted,#7c7069);font-weight:700;margin-top:2px;">Build P·P·L from {{ profile.libTotal }} exercises</div>
+</div>
+<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--muted,#7c7069)" stroke-width="2.4" stroke-linecap="round"><polyline points="9 6 15 12 9 18"></polyline></svg>
+</div>
+
+<div style="background:var(--card,#fff);border:1px solid var(--line,#ece3dc);border-radius:18px;padding:6px 16px;box-shadow:0 8px 22px -16px var(--shadow,rgba(40,25,15,.1));">
+<div style="padding:14px 0 13px;border-bottom:1px solid var(--line,#ece3dc);">
+<div style="font-size:13px;font-weight:800;color:var(--text,#241c17);margin-bottom:11px;">Appearance</div>
+<div style="display:flex;gap:6px;background:var(--card2,#f4ede9);border-radius:13px;padding:4px;">
+<div onClick="{{ profile.setLight }}" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 0;border-radius:10px;cursor:pointer;background:{{ profile.lightBg }};box-shadow:{{ profile.lightShadow }};">
+<span style="font-size:13px;">☀️</span><span style="font-size:12.5px;font-weight:800;color:{{ profile.lightColor }};">Light</span>
+</div>
+<div onClick="{{ profile.setDark }}" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 0;border-radius:10px;cursor:pointer;background:{{ profile.darkBg }};box-shadow:{{ profile.darkShadow }};">
+<span style="font-size:13px;">🌙</span><span style="font-size:12.5px;font-weight:800;color:{{ profile.darkColor }};">Dark</span>
+</div>
+</div>
+</div>
+<div onClick="{{ profile.onEdit }}" style="display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--line,#ece3dc);cursor:pointer;">
+<span style="font-size:13px;font-weight:800;color:var(--text,#241c17);">Units</span>
+<div style="display:flex;align-items:center;gap:6px;"><span style="font-size:13px;font-weight:800;color:var(--muted,#7c7069);">{{ profile.units }}</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--muted,#7c7069)" stroke-width="2.4" stroke-linecap="round"><polyline points="9 6 15 12 9 18"></polyline></svg></div>
+</div>
+<div onClick="{{ goSync }}" style="display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--line,#ece3dc);cursor:pointer;">
+<div><div style="font-size:13px;font-weight:800;color:var(--text,#241c17);">Google account</div><div style="font-size:11px;color:var(--muted,#7c7069);font-weight:700;margin-top:1px;">{{ profile.syncSub }}</div></div>
+<div style="display:flex;align-items:center;gap:7px;"><div style="width:7px;height:7px;border-radius:50%;background:{{ profile.syncDot }};"></div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--muted,#7c7069)" stroke-width="2.4" stroke-linecap="round"><polyline points="9 6 15 12 9 18"></polyline></svg></div>
+</div>
+<div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0;">
+<span style="font-size:13px;font-weight:800;color:var(--text,#241c17);">Rest timer default</span>
+<span style="font-size:13px;font-weight:800;color:var(--muted,#7c7069);">90 s</span>
+</div>
+</div>
+
+<div onClick="{{ profile.onSignOut }}" style="text-align:center;font-size:13px;color:var(--hero1,#f2543d);font-weight:800;padding:6px;cursor:pointer;">Sign out</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ showConfig }}" hint-placeholder-val="{{ false }}">
+<div style="padding:6px 14px 22px;display:flex;flex-direction:column;gap:13px;">
+<div style="display:flex;align-items:center;gap:10px;margin-top:4px;">
+<div onClick="{{ config.onBack }}" style="width:32px;height:32px;border-radius:50%;background:var(--card,#fff);border:1px solid var(--line,#ece3dc);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;">
+<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--text,#241c17)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+</div>
+<div style="flex:1;">
+<div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:20px;color:var(--text,#241c17);line-height:1;">Configure Workouts</div>
+<div style="font-size:11.5px;color:var(--muted,#7c7069);font-weight:700;margin-top:3px;">Tap to add or remove moves for each day</div>
+</div>
+</div>
+
+<div style="display:flex;gap:7px;">
+<sc-for list="{{ config.tabs }}" as="tab" hint-placeholder-count="3">
+<div onClick="{{ tab.onClick }}" style="flex:1;text-align:center;padding:10px 0;border-radius:13px;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:14px;cursor:pointer;background:{{ tab.bg }};color:{{ tab.color }};border:1px solid var(--line,#ece3dc);">{{ tab.label }}</div>
+</sc-for>
+</div>
+
+<div style="display:flex;gap:6px;background:var(--card2,#f4ede9);border-radius:13px;padding:4px;">
+<sc-for list="{{ config.days }}" as="d" hint-placeholder-count="2">
+<div onClick="{{ d.onClick }}" style="flex:1;text-align:center;padding:9px 0;border-radius:10px;font-size:12.5px;font-weight:800;cursor:pointer;background:{{ d.bg }};color:{{ d.color }};box-shadow:{{ d.shadow }};">{{ d.label }}</div>
+</sc-for>
+</div>
+
+<div style="display:flex;justify-content:space-between;align-items:center;background:var(--card,#fff);border:1px solid var(--line,#ece3dc);border-radius:15px;padding:12px 14px;">
+<div style="flex:1;padding-right:10px;">
+<div style="font-size:12.5px;font-weight:800;color:var(--text,#241c17);">Repeat Day 1 on Day 2</div>
+<div style="font-size:10.5px;color:var(--muted,#7c7069);font-weight:700;margin-top:2px;">Off = give Day 2 its own exercises</div>
+</div>
+<div onClick="{{ config.onToggleMirror }}" style="width:46px;height:27px;border-radius:14px;background:{{ config.mirrorTrackBg }};position:relative;cursor:pointer;flex-shrink:0;transition:background .15s;"><div style="width:21px;height:21px;border-radius:50%;background:#fff;position:absolute;top:3px;left:{{ config.mirrorKnobLeft }};transition:left .15s;box-shadow:0 1px 3px rgba(0,0,0,.3);"></div></div>
+</div>
+
+<div style="display:flex;justify-content:space-between;align-items:center;padding:0 2px;">
+<span style="font-size:12px;color:var(--muted,#7c7069);font-weight:700;"><b style="color:var(--hero1,#f2543d);font-family:'Baloo 2',sans-serif;">{{ config.count }}</b> of {{ config.total }} · {{ config.dayLabel }}</span>
+<span onClick="{{ config.onReset }}" style="font-size:11.5px;color:var(--muted,#7c7069);font-weight:800;text-decoration:underline;cursor:pointer;">Reset</span>
+</div>
+
+<sc-if value="{{ config.isMirrored }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;align-items:center;gap:9px;background:var(--card2,#f4ede9);border-radius:14px;padding:13px 15px;">
+<span style="font-size:16px;">🔁</span>
+<span style="font-size:12px;color:var(--muted,#7c7069);font-weight:700;line-height:1.5;">Day 2 mirrors your Day 1 plan. Turn off <b style="color:var(--text,#241c17);">Repeat</b> above to customise it separately.</span>
+</div>
+</sc-if>
+
+<sc-if value="{{ config.notMirrored }}" hint-placeholder-val="{{ true }}">
+<sc-for list="{{ config.groups }}" as="g" hint-placeholder-count="4">
+<div>
+<div style="font-size:11px;font-weight:800;color:var(--muted,#7c7069);text-transform:uppercase;letter-spacing:.06em;margin:8px 2px 8px;">{{ g.name }} · {{ g.count }}</div>
+<div style="display:flex;flex-direction:column;gap:9px;">
+<sc-for list="{{ g.items }}" as="it" hint-placeholder-count="3">
+<div onClick="{{ it.onToggle }}" style="display:flex;align-items:center;gap:12px;background:var(--card,#fff);border:1.5px solid {{ it.cardBorder }};border-radius:15px;padding:9px 12px 9px 9px;cursor:pointer;box-shadow:0 6px 16px -14px var(--shadow,rgba(40,25,15,.1));">
+<div role="img" aria-label="{{ it.name }}" style="width:52px;height:52px;border-radius:11px;background-color:var(--card2,#f4ede9);background-image:url({{ it.img }});background-size:cover;background-position:center;flex-shrink:0;"></div>
+<div style="flex:1;">
+<div style="font-size:13.5px;font-weight:800;color:var(--text,#241c17);line-height:1.2;">{{ it.name }}</div>
+<div style="font-size:11px;color:var(--muted,#7c7069);font-weight:700;margin-top:2px;">{{ it.muscle }}</div>
+</div>
+<div style="width:27px;height:27px;border-radius:9px;border:2px solid {{ it.checkBorder }};background:{{ it.checkBg }};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+<sc-if value="{{ it.inPlan }}" hint-placeholder-val="{{ false }}"><span style="color:#fff;font-size:14px;font-weight:900;">✓</span></sc-if>
+<sc-if value="{{ it.notInPlan }}" hint-placeholder-val="{{ true }}"><span style="color:var(--muted,#b3a99f);font-size:16px;font-weight:400;line-height:1;">+</span></sc-if>
+</div>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-for>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ showSync }}" hint-placeholder-val="{{ false }}">
+<div style="padding:6px 16px 20px;display:flex;flex-direction:column;gap:13px;">
+<div style="display:flex;align-items:center;gap:10px;margin-top:4px;">
+<div onClick="{{ back }}" style="width:32px;height:32px;border-radius:50%;background:var(--card,#fff);border:1px solid var(--line,#ece3dc);display:flex;align-items:center;justify-content:center;cursor:pointer;">
+<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--text,#241c17)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+</div>
+<span style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:21px;color:var(--text,#241c17);">Google Sync</span>
+</div>
+
+<div style="display:flex;align-items:center;gap:12px;background:var(--card,#fff);border:1px solid var(--line,#ece3dc);border-radius:18px;padding:14px;box-shadow:0 8px 22px -16px var(--shadow,rgba(40,25,15,.1));">
+<div style="width:42px;height:42px;border-radius:50%;background:var(--card2,#f4ede9);display:flex;align-items:center;justify-content:center;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:16px;color:var(--hero1,#f2543d);">K</div>
+<div style="flex:1;"><div style="font-size:13.5px;font-weight:800;color:var(--text,#241c17);">karthik@gmail.com</div><div style="display:flex;align-items:center;gap:5px;margin-top:2px;"><div style="width:6px;height:6px;border-radius:50%;background:var(--good,#2fa565);"></div><span style="font-size:11px;color:var(--good,#2fa565);font-weight:800;">Connected</span></div></div>
+</div>
+
+<div style="background:var(--card,#fff);border:1px solid var(--line,#ece3dc);border-radius:18px;padding:6px 16px;box-shadow:0 8px 22px -16px var(--shadow,rgba(40,25,15,.1));">
+<div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--line,#ece3dc);">
+<div><div style="font-size:13px;font-weight:800;color:var(--text,#241c17);">Last synced</div><div style="font-size:11.5px;color:var(--muted,#7c7069);font-weight:700;margin-top:2px;">{{ syncLabel }}</div></div>
+<button onClick="{{ syncNow }}" style="display:flex;align-items:center;gap:7px;border:none;background:var(--card2,#f4ede9);color:var(--text,#241c17);font-weight:800;font-size:12px;padding:9px 14px;border-radius:13px;cursor:pointer;">
+<sc-if value="{{ syncing }}" hint-placeholder-val="{{ false }}"><span style="width:12px;height:12px;border-radius:50%;border:2px solid var(--muted,#7c7069);border-top-color:var(--hero1,#f2543d);display:inline-block;animation:spin .9s linear infinite;"></span>Syncing</sc-if>
+<sc-if value="{{ notSyncing }}" hint-placeholder-val="{{ true }}"><span style="width:8px;height:8px;border-radius:50%;background:var(--good,#2fa565);display:inline-block;"></span>Sync now</sc-if>
+</button>
+</div>
+<div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0;">
+<div><div style="font-size:13px;font-weight:800;color:var(--text,#241c17);">Auto-sync on Wi-Fi only</div><div style="font-size:11px;color:var(--muted,#7c7069);font-weight:700;margin-top:1px;">Save mobile data</div></div>
+<div onClick="{{ toggleWifi }}" style="width:46px;height:27px;border-radius:14px;background:{{ wifiBg }};position:relative;cursor:pointer;flex-shrink:0;transition:background .15s;"><div style="width:21px;height:21px;border-radius:50%;background:#fff;position:absolute;top:3px;left:{{ wifiLeft }};transition:left .15s;box-shadow:0 1px 3px rgba(0,0,0,.3);"></div></div>
+</div>
+</div>
+
+<div style="background:var(--card,#fff);border:1px solid var(--line,#ece3dc);border-radius:18px;padding:15px 16px;box-shadow:0 8px 22px -16px var(--shadow,rgba(40,25,15,.1));">
+<div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:13px;font-weight:800;color:var(--text,#241c17);">42 workouts backed up</span><span style="font-size:11px;color:var(--muted,#7c7069);font-weight:700;">1.2 MB</span></div>
+<div style="height:7px;border-radius:5px;background:var(--card2,#f4ede9);overflow:hidden;margin-top:10px;"><div style="height:100%;width:38%;border-radius:5px;background:linear-gradient(90deg,var(--hero1,#f2543d),var(--hero2,#d63d4a));"></div></div>
+<div style="font-size:11px;color:var(--muted,#7c7069);font-weight:700;margin-top:7px;">Backed up to your private Google Drive app folder.</div>
+</div>
+
+<div onClick="{{ signOut }}" style="text-align:center;font-size:13px;color:var(--hero1,#f2543d);font-weight:800;padding:6px;cursor:pointer;">Disconnect Google account</div>
+</div>
+</sc-if>
+
+</div>
+
+<sc-if value="{{ showNav }}" hint-placeholder-val="{{ true }}">
+<div style="flex-shrink:0;display:flex;justify-content:space-around;align-items:center;padding:9px 8px 12px;background:var(--card,#fff);border-top:1px solid var(--line,#ece3dc);">
+<div onClick="{{ goToday }}" style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:2px 14px;">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="{{ nav.todayColor }}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h7l-1 8 10-12h-7z"></path></svg>
+<span style="font-size:9.5px;font-weight:800;color:{{ nav.todayColor }};">Today</span>
+</div>
+<div onClick="{{ goProgress }}" style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:2px 14px;">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="{{ nav.progressColor }}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="20" x2="4" y2="12"></line><line x1="10" y1="20" x2="10" y2="5"></line><line x1="16" y1="20" x2="16" y2="9"></line><line x1="22" y1="20" x2="4" y2="20"></line></svg>
+<span style="font-size:9.5px;font-weight:800;color:{{ nav.progressColor }};">Progress</span>
+</div>
+<div onClick="{{ goProfile }}" style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:2px 14px;">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="{{ nav.profileColor }}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"></path></svg>
+<span style="font-size:9.5px;font-weight:800;color:{{ nav.profileColor }};">Profile</span>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ setup.open }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;background:rgba(10,7,5,.55);backdrop-filter:blur(6px);display:flex;align-items:flex-end;z-index:25;">
+<div class="scr" style="width:100%;max-height:92%;overflow-y:auto;background:var(--bg,#faf7f3);border-radius:28px 28px 36px 36px;padding:20px 20px 26px;animation:riseIn .28s ease;">
+<div style="width:44px;height:4px;border-radius:2px;background:var(--line,#ece3dc);margin:0 auto 14px;"></div>
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+<div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:20px;color:var(--text,#241c17);">Your details</div>
+<div onClick="{{ setup.onClose }}" style="width:30px;height:30px;border-radius:50%;background:var(--card2,#f4ede9);display:flex;align-items:center;justify-content:center;cursor:pointer;font-weight:800;color:var(--muted,#7c7069);font-size:16px;">✕</div>
+</div>
+<div style="font-size:12px;color:var(--muted,#7c7069);font-weight:600;margin-bottom:16px;">This is what you share on setup — used across your plan, targets and BMI.</div>
+
+<div style="margin-bottom:14px;">
+<div style="font-size:11px;font-weight:800;color:var(--muted,#7c7069);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">Name</div>
+<input value="{{ setup.name }}" onInput="{{ setup.onName }}" placeholder="Your name" style="width:100%;border:1px solid var(--line,#ece3dc);background:var(--card,#fff);border-radius:14px;padding:12px 14px;font-family:'Nunito',sans-serif;font-weight:700;font-size:14px;color:var(--text,#241c17);outline:none;">
+</div>
+
+<div style="display:flex;flex-direction:column;gap:11px;">
+<div style="display:flex;align-items:center;justify-content:space-between;background:var(--card,#fff);border:1px solid var(--line,#ece3dc);border-radius:15px;padding:12px 14px;">
+<span style="font-size:13.5px;font-weight:800;color:var(--text,#241c17);">Height</span>
+<div style="display:flex;align-items:center;gap:12px;">
+<div onClick="{{ setup.hMinus }}" style="width:30px;height:30px;border-radius:10px;background:var(--card2,#f4ede9);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;color:var(--text,#241c17);cursor:pointer;">−</div>
+<span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:14px;color:var(--text,#241c17);min-width:56px;text-align:center;">{{ setup.heightText }}</span>
+<div onClick="{{ setup.hPlus }}" style="width:30px;height:30px;border-radius:10px;background:var(--card2,#f4ede9);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;color:var(--text,#241c17);cursor:pointer;">+</div>
+</div>
+</div>
+<div style="display:flex;align-items:center;justify-content:space-between;background:var(--card,#fff);border:1px solid var(--line,#ece3dc);border-radius:15px;padding:12px 14px;">
+<span style="font-size:13.5px;font-weight:800;color:var(--text,#241c17);">Current weight</span>
+<div style="display:flex;align-items:center;gap:12px;">
+<div onClick="{{ setup.wMinus }}" style="width:30px;height:30px;border-radius:10px;background:var(--card2,#f4ede9);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;color:var(--text,#241c17);cursor:pointer;">−</div>
+<span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:14px;color:var(--text,#241c17);min-width:56px;text-align:center;">{{ setup.weightText }}</span>
+<div onClick="{{ setup.wPlus }}" style="width:30px;height:30px;border-radius:10px;background:var(--card2,#f4ede9);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;color:var(--text,#241c17);cursor:pointer;">+</div>
+</div>
+</div>
+<div style="display:flex;align-items:center;justify-content:space-between;background:var(--card,#fff);border:1px solid var(--line,#ece3dc);border-radius:15px;padding:12px 14px;">
+<span style="font-size:13.5px;font-weight:800;color:var(--text,#241c17);">Target weight</span>
+<div style="display:flex;align-items:center;gap:12px;">
+<div onClick="{{ setup.tMinus }}" style="width:30px;height:30px;border-radius:10px;background:var(--card2,#f4ede9);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;color:var(--text,#241c17);cursor:pointer;">−</div>
+<span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:14px;color:var(--text,#241c17);min-width:56px;text-align:center;">{{ setup.targetText }}</span>
+<div onClick="{{ setup.tPlus }}" style="width:30px;height:30px;border-radius:10px;background:var(--card2,#f4ede9);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;color:var(--text,#241c17);cursor:pointer;">+</div>
+</div>
+</div>
+</div>
+
+<div style="font-size:11px;font-weight:800;color:var(--muted,#7c7069);text-transform:uppercase;letter-spacing:.05em;margin:16px 0 8px;">Goal</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+<sc-for list="{{ setup.goals }}" as="g" hint-placeholder-count="4">
+<div onClick="{{ g.onPick }}" style="padding:12px 10px;border-radius:14px;text-align:center;font-size:12.5px;font-weight:800;cursor:pointer;background:{{ g.bg }};color:{{ g.color }};">{{ g.label }}</div>
+</sc-for>
+</div>
+
+<div style="font-size:11px;font-weight:800;color:var(--muted,#7c7069);text-transform:uppercase;letter-spacing:.05em;margin:16px 0 8px;">Preferred units</div>
+<div style="display:flex;gap:6px;background:var(--card2,#f4ede9);border-radius:14px;padding:4px;">
+<sc-for list="{{ setup.unitsOpts }}" as="un" hint-placeholder-count="2">
+<div onClick="{{ un.onPick }}" style="flex:1;text-align:center;padding:10px 0;border-radius:11px;font-size:12.5px;font-weight:800;cursor:pointer;background:{{ un.bg }};color:{{ un.color }};box-shadow:{{ un.shadow }};">{{ un.label }}</div>
+</sc-for>
+</div>
+
+<button onClick="{{ setup.onSave }}" style="width:100%;margin-top:20px;border:none;background:linear-gradient(135deg,var(--hero1,#f2543d),var(--hero2,#d63d4a));color:#fff;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:16px;padding:15px;border-radius:16px;cursor:pointer;box-shadow:0 12px 22px -12px var(--hero1,#f2543d);">Save details</button>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ rest.open }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;background:rgba(10,7,5,.55);backdrop-filter:blur(6px);display:flex;align-items:flex-end;z-index:20;">
+<div style="width:100%;background:var(--bg,#faf7f3);border-radius:30px 30px 36px 36px;padding:24px 24px 30px;animation:riseIn .28s ease;">
+<div style="width:44px;height:4px;border-radius:2px;background:var(--line,#ece3dc);margin:0 auto 16px;"></div>
+<div style="text-align:center;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:16px;color:var(--muted,#7c7069);">Rest between sets</div>
+<div style="position:relative;width:180px;height:180px;margin:14px auto 6px;">
+<svg width="180" height="180" viewBox="0 0 180 180">
+<circle cx="90" cy="90" r="78" fill="none" stroke="var(--card2,#f4ede9)" stroke-width="12"></circle>
+<circle cx="90" cy="90" r="78" fill="none" stroke="var(--hero1,#f2543d)" stroke-width="12" stroke-linecap="round" stroke-dasharray="{{ rest.circ }}" stroke-dashoffset="{{ rest.offset }}" transform="rotate(-90 90 90)"></circle>
+</svg>
+<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+<span style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:44px;color:var(--text,#241c17);line-height:1;">{{ rest.text }}</span>
+<span style="font-size:12px;color:var(--muted,#7c7069);font-weight:800;margin-top:2px;">seconds</span>
+</div>
+</div>
+<div style="display:flex;gap:10px;margin-top:12px;">
+<button onClick="{{ rest.onSub }}" style="flex:1;border:1px solid var(--line,#ece3dc);background:var(--card,#fff);color:var(--text,#241c17);font-weight:800;font-size:13px;padding:13px;border-radius:15px;cursor:pointer;">−15s</button>
+<button onClick="{{ rest.onAdd }}" style="flex:1;border:1px solid var(--line,#ece3dc);background:var(--card,#fff);color:var(--text,#241c17);font-weight:800;font-size:13px;padding:13px;border-radius:15px;cursor:pointer;">+15s</button>
+</div>
+<button onClick="{{ rest.onSkip }}" style="width:100%;margin-top:10px;border:none;background:linear-gradient(135deg,var(--hero1,#f2543d),var(--hero2,#d63d4a));color:#fff;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:15px;padding:15px;border-radius:16px;cursor:pointer;box-shadow:0 12px 22px -12px var(--hero1,#f2543d);">Skip rest</button>
+</div>
+</div>
+</sc-if>
+
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:390,&quot;height&quot;:820},&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:[&quot;#f2543d&quot;,&quot;#d63d4a&quot;],&quot;tsType&quot;:&quot;string[]&quot;,&quot;options&quot;:[[&quot;#f2543d&quot;,&quot;#d63d4a&quot;],[&quot;#f59e0b&quot;,&quot;#ef4444&quot;],[&quot;#2fa565&quot;,&quot;#0e9488&quot;],[&quot;#3e8ef7&quot;,&quot;#6366f1&quot;],[&quot;#8b5cf6&quot;,&quot;#d63d8f&quot;]],&quot;section&quot;:&quot;Theme&quot;},&quot;defaultTheme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;light&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;tsType&quot;:&quot;'light' | 'dark'&quot;,&quot;section&quot;:&quot;Theme&quot;},&quot;units&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;kg&quot;,&quot;options&quot;:[&quot;kg&quot;,&quot;lb&quot;],&quot;tsType&quot;:&quot;'kg' | 'lb'&quot;,&quot;section&quot;:&quot;Data&quot;},&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;today&quot;,&quot;options&quot;:[&quot;today&quot;,&quot;signin&quot;],&quot;tsType&quot;:&quot;'today' | 'signin'&quot;,&quot;section&quot;:&quot;Data&quot;}}">
+class Component extends DCLogic {
+  state = {
+    screen: undefined,
+    theme: undefined,
+    selDOW: 1,
+    activeId: null,
+    activeSlot: null,
+    plan: null,
+    mirror: null,
+    cfgTab: 'push',
+    cfgDay: 1,
+    logs: {},
+    doneTime: {},
+    signedIn: true,
+    sync: { status: 'done', label: 'Synced 4 min ago' },
+    wifiOnly: true,
+    rest: { open: false, total: 90, left: 90 },
+    setupOpen: false,
+    user: null,
+    draft: null
+  };
+
+  dayType = { 0: 'rest', 1: 'push', 2: 'pull', 3: 'legs', 4: 'push', 5: 'pull', 6: 'legs' };
+  daySlot = { 1: 'push1', 2: 'pull1', 3: 'legs1', 4: 'push2', 5: 'pull2', 6: 'legs2' };
+  day2Default = {
+    push: ['dumbbell-bench-press', 'incline-barbell-press', 'standing-barbell-press', 'machine-chest-press', 'arnold-press', 'ez-bar-skullcrusher', 'chest-dip'],
+    pull: ['romanian-deadlift', 'pull-up', 'bent-over-barbell-row', 'barbell-shrug', 'reverse-flyes', 'preacher-curl', 'hammer-curl'],
+    legs: ['front-squat', 'hack-squat', 'lying-leg-curl', 'barbell-hip-thrust', 'goblet-squat', 'seated-calf-raise']
+  };
+  rail = [
+    { dow: 1, l: 'P', dowLabel: 'Mon' }, { dow: 2, l: 'P', dowLabel: 'Tue' }, { dow: 3, l: 'L', dowLabel: 'Wed' },
+    { dow: 4, l: 'P', dowLabel: 'Thu' }, { dow: 5, l: 'P', dowLabel: 'Fri' }, { dow: 6, l: 'L', dowLabel: 'Sat' },
+    { dow: 0, l: 'R', dowLabel: 'Sun' }
+  ];
+  typeName = { push: 'Push Day', pull: 'Pull Day', legs: 'Leg Day', rest: 'Rest Day' };
+  typeSub = { push: 'Chest · Shoulders · Triceps', pull: 'Back · Traps · Biceps', legs: 'Quads · Glutes · Calves', rest: 'Recover & grow' };
+
+  exercisesByDay = {
+    push: [
+      { name: 'Barbell Bench Press', muscle: 'Chest', sets: 4, reps: 8, last: 60, img: 'img/bench.jpg', tip: 'Retract your shoulder blades and lower the bar to mid-chest with control.', alts: [
+        { name: 'Dumbbell Bench Press', muscle: 'Chest', reps: 10, last: 24, img: 'img/alt-db-bench.jpg', tip: 'Great if the bench rack is busy — lets each arm work independently.' },
+        { name: 'Push-Up', muscle: 'Chest', reps: 15, last: 0, img: 'img/alt-pushup.jpg', tip: 'Bodyweight fallback — keep a straight line from head to heels.' } ] },
+      { name: 'Incline Dumbbell Press', muscle: 'Upper Chest', sets: 3, reps: 10, last: 22, img: 'img/incline-db.jpg', tip: 'Set the bench to ~45°. Press up and slightly inward, squeezing at the top.', alts: [
+        { name: 'Incline Barbell Press', muscle: 'Upper Chest', reps: 8, last: 40, img: 'img/alt-incline-bb.jpg', tip: 'Heavier upper-chest option — lower the bar to just below the collarbone.' } ] },
+      { name: 'Seated DB Shoulder Press', muscle: 'Shoulders', sets: 3, reps: 10, last: 18, img: 'img/shoulder-press.jpg', tip: 'Brace your core and keep elbows slightly in front — don\u2019t flare them out.', alts: [
+        { name: 'Arnold Press', muscle: 'Shoulders', reps: 10, last: 16, img: 'img/alt-arnold.jpg', tip: 'Rotate palms as you press to hit all three delt heads.' } ] },
+      { name: 'Cable Fly', muscle: 'Chest', sets: 3, reps: 12, last: 15, img: 'img/cable-fly.jpg', tip: 'Keep a slight bend in the elbows and squeeze the chest at the mid-point.', alts: [
+        { name: 'Pec Deck Machine', muscle: 'Chest', reps: 12, last: 40, img: 'img/alt-pec-deck.jpg', tip: 'Fixed path — perfect for a controlled squeeze at the end of the workout.' },
+        { name: 'Dumbbell Flyes', muscle: 'Chest', reps: 12, last: 12, img: 'img/alt-db-fly.jpg', tip: 'Big stretch at the bottom — don\u2019t go too heavy.' } ] },
+      { name: 'Lateral Raise', muscle: 'Side Delts', sets: 3, reps: 15, last: 10, img: 'img/lateral-raise.jpg', tip: 'Lead with your elbows, raise to shoulder height, and control the way down.', alts: [
+        { name: 'Front Raise', muscle: 'Front Delts', reps: 12, last: 10, img: 'img/alt-front-raise.jpg', tip: 'Hits the front delts — raise to eye level, no swinging.' } ] },
+      { name: 'Triceps Rope Pushdown', muscle: 'Triceps', sets: 3, reps: 12, last: 25, img: 'img/triceps-pushdown.jpg', tip: 'Pin your elbows to your sides and fully lock out at the bottom.', alts: [
+        { name: 'Bench Dips', muscle: 'Triceps', reps: 12, last: 0, img: 'img/alt-bench-dip.jpg', tip: 'Bodyweight option — keep elbows tucked and lower under control.' } ] },
+      { name: 'Treadmill Incline Walk', muscle: 'Cardio', time: true, dur: 12, img: 'img/treadmill.jpg', tip: 'Finish with a brisk incline walk to stay in the fat-burning zone.' }
+    ],
+    pull: [
+      { name: 'Deadlift', muscle: 'Back', sets: 4, reps: 6, last: 90, img: 'img/deadlift.jpg', tip: 'Keep a flat back, brace hard, and drive through your heels.', alts: [
+        { name: 'Romanian Deadlift', muscle: 'Hamstrings', reps: 10, last: 60, img: 'img/alt-rdl.jpg', tip: 'Softer on the lower back — push hips back and feel the hamstring stretch.' } ] },
+      { name: 'Wide-Grip Lat Pulldown', muscle: 'Back', sets: 4, reps: 10, last: 55, img: 'img/lat-pulldown.jpg', tip: 'Pull the bar to your upper chest, driving your elbows down and back.', alts: [
+        { name: 'Pull-Up', muscle: 'Back', reps: 8, last: 0, img: 'img/alt-pullup.jpg', tip: 'The gold standard — use an assist band if you can\u2019t hit the reps yet.' } ] },
+      { name: 'Seated Cable Row', muscle: 'Back', sets: 3, reps: 10, last: 60, img: 'img/cable-row.jpg', tip: 'Chest up, pull to your stomach, and squeeze the shoulder blades together.', alts: [
+        { name: 'Bent-Over Barbell Row', muscle: 'Back', reps: 10, last: 50, img: 'img/alt-bb-row.jpg', tip: 'Hinge to ~45°, pull to your belly button, keep the back flat.' },
+        { name: 'T-Bar Row', muscle: 'Back', reps: 10, last: 45, img: 'img/alt-tbar.jpg', tip: 'Great for mid-back thickness — drive the elbows back.' } ] },
+      { name: 'Dumbbell Shrug', muscle: 'Traps', sets: 3, reps: 12, last: 20, img: 'img/shrug.jpg', tip: 'Shrug straight up and pause hard at the top — no rolling.' },
+      { name: 'Face Pull', muscle: 'Rear Delts', sets: 3, reps: 15, last: 25, img: 'img/face-pull.jpg', tip: 'Keep elbows high and pull the rope towards your forehead.', alts: [
+        { name: 'Reverse Flyes', muscle: 'Rear Delts', reps: 15, last: 8, img: 'img/alt-rev-fly.jpg', tip: 'Bend at the hips and raise the dumbbells out wide — squeeze the rear delts.' } ] },
+      { name: 'Barbell Curl', muscle: 'Biceps', sets: 3, reps: 12, last: 30, img: 'img/barbell-curl.jpg', tip: 'No swinging — keep elbows fixed and squeeze at the top.', alts: [
+        { name: 'Dumbbell Curl', muscle: 'Biceps', reps: 12, last: 14, img: 'img/alt-db-curl.jpg', tip: 'Alternate arms and supinate the wrist as you curl.' },
+        { name: 'Hammer Curl', muscle: 'Biceps', reps: 12, last: 14, img: 'img/alt-hammer.jpg', tip: 'Neutral grip — builds the brachialis and forearms.' } ] }
+    ],
+    legs: [
+      { name: 'Barbell Back Squat', muscle: 'Quads', sets: 4, reps: 8, last: 80, img: 'img/squat.jpg', tip: 'Hips back, knees tracking your toes, and descend below parallel.', alts: [
+        { name: 'Hack Squat', muscle: 'Quads', reps: 10, last: 80, img: 'img/alt-hack.jpg', tip: 'Machine-guided — safer to push close to failure on the quads.' },
+        { name: 'Goblet Squat', muscle: 'Quads', reps: 12, last: 24, img: 'img/alt-goblet.jpg', tip: 'Hold a dumbbell at your chest — great for depth and form.' } ] },
+      { name: 'Leg Press', muscle: 'Quads', sets: 3, reps: 12, last: 140, img: 'img/leg-press.jpg', tip: 'Feet shoulder-width, and don\u2019t lock your knees at the top.', alts: [
+        { name: 'Dumbbell Squat', muscle: 'Quads', reps: 12, last: 24, img: 'img/alt-db-squat.jpg', tip: 'Hold dumbbells at your sides — a solid free-weight substitute.' } ] },
+      { name: 'Walking Lunge (DB)', muscle: 'Glutes', sets: 3, reps: 12, last: 16, img: 'img/lunge.jpg', tip: 'Take a long stride and drop your back knee towards the floor.', alts: [
+        { name: 'Barbell Step-Ups', muscle: 'Glutes', reps: 12, last: 20, img: 'img/alt-stepup.jpg', tip: 'Drive through the heel of the top foot — control the descent.' } ] },
+      { name: 'Leg Extension', muscle: 'Quads', sets: 3, reps: 15, last: 45, img: 'img/leg-extension.jpg', tip: 'Squeeze your quads at the top and lower slowly.' },
+      { name: 'Standing Calf Raise', muscle: 'Calves', sets: 4, reps: 15, last: 60, img: 'img/calf-raise.jpg', tip: 'Get a full stretch at the bottom and pause at the top.', alts: [
+        { name: 'Seated Calf Raise', muscle: 'Calves', reps: 15, last: 40, img: 'img/alt-seated-calf.jpg', tip: 'Bent knees target the soleus — pause hard at the top.' } ] }
+    ]
+  };
+
+  defaultUser() {
+    return {
+      name: 'Karthik R', gym: 'Slam Fitness · Chennai',
+      heightCm: 180, weightKg: 110, targetKg: 95,
+      goal: 'Fat loss + muscle',
+      units: this.props.units === 'lb' ? 'lb' : 'kg'
+    };
+  }
+  getUser() { return this.state.user || this.defaultUser(); }
+  units() { return this.getUser().units === 'lb' ? 'lb' : 'kg'; }
+  dispW(kg) { return this.units() === 'lb' ? (Math.round(kg * 2.20462 * 2) / 2) : kg; }
+  wStep() { return this.units() === 'lb' ? 5 : 2.5; }
+
+  extraLib = {
+    push: [
+      { name: 'Machine Chest Press', muscle: 'Chest', reps: 12, last: 45, img: 'img/machine-press.jpg', tip: 'Fixed path — great for chasing failure safely at the end.' },
+      { name: 'Decline Bench Press', muscle: 'Chest', reps: 10, last: 55, img: 'img/decline-bench.jpg', tip: 'Targets the lower chest — keep the bar path over the lower pecs.' },
+      { name: 'Chest Dip', muscle: 'Chest', reps: 10, last: 0, img: 'img/chest-dip.jpg', tip: 'Lean forward to bias the chest — control the descent.' },
+      { name: 'Standing Barbell Press', muscle: 'Shoulders', reps: 8, last: 40, img: 'img/military-press.jpg', tip: 'Brace hard, press overhead, and keep ribs down.' },
+      { name: 'EZ-Bar Skullcrusher', muscle: 'Triceps', reps: 12, last: 25, img: 'img/skullcrusher.jpg', tip: 'Lower to your forehead, elbows fixed — keep it strict.' },
+      { name: 'Overhead Triceps Extension', muscle: 'Triceps', reps: 12, last: 16, img: 'img/oh-tricep-ext.jpg', tip: 'Big stretch overhead — keep elbows pointing forward.' }
+    ],
+    pull: [
+      { name: 'Chin-Up', muscle: 'Back', reps: 8, last: 0, img: 'img/chinup.jpg', tip: 'Underhand grip hits the lats and biceps — full hang to chin over bar.' },
+      { name: 'Close-Grip Pulldown', muscle: 'Back', reps: 10, last: 50, img: 'img/close-pulldown.jpg', tip: 'Neutral close grip — drive elbows to your ribs.' },
+      { name: 'One-Arm Dumbbell Row', muscle: 'Back', reps: 10, last: 28, img: 'img/one-arm-row.jpg', tip: 'Support on a bench, row to the hip, and get a full stretch.' },
+      { name: 'Barbell Shrug', muscle: 'Traps', reps: 12, last: 60, img: 'img/bb-shrug.jpg', tip: 'Shrug straight up, hold at the top — heavier than dumbbells.' },
+      { name: 'Preacher Curl', muscle: 'Biceps', reps: 10, last: 25, img: 'img/preacher-curl.jpg', tip: 'Pinned elbows on the pad isolate the biceps — no cheating.' },
+      { name: 'Cable Curl', muscle: 'Biceps', reps: 12, last: 25, img: 'img/cable-curl.jpg', tip: 'Constant tension through the whole range — squeeze at the top.' },
+      { name: 'Concentration Curl', muscle: 'Biceps', reps: 12, last: 12, img: 'img/concentration-curl.jpg', tip: 'Seated, elbow on thigh — the ultimate biceps peak isolator.' }
+    ],
+    legs: [
+      { name: 'Front Squat', muscle: 'Quads', reps: 8, last: 50, img: 'img/front-squat.jpg', tip: 'Elbows high, torso upright — hammers the quads.' },
+      { name: 'Lying Leg Curl', muscle: 'Hamstrings', reps: 12, last: 40, img: 'img/lying-leg-curl.jpg', tip: 'Curl fully and squeeze — don\u2019t let the weight drop.' },
+      { name: 'Seated Leg Curl', muscle: 'Hamstrings', reps: 12, last: 45, img: 'img/seated-leg-curl.jpg', tip: 'Great hamstring stretch under load — controlled reps.' },
+      { name: 'Stiff-Leg Deadlift', muscle: 'Hamstrings', reps: 10, last: 60, img: 'img/stiff-deadlift.jpg', tip: 'Soft knees, hinge at the hips, feel the hamstring stretch.' },
+      { name: 'Barbell Hip Thrust', muscle: 'Glutes', reps: 12, last: 70, img: 'img/hip-thrust.jpg', tip: 'Drive through the heels and squeeze the glutes hard at the top.' },
+      { name: 'Glute Bridge', muscle: 'Glutes', reps: 15, last: 40, img: 'img/glute-bridge.jpg', tip: 'Floor-based glute builder — pause at the top of each rep.' }
+    ]
+  };
+  groupOf = { 'Chest': 'Chest', 'Upper Chest': 'Chest', 'Shoulders': 'Shoulders', 'Side Delts': 'Shoulders', 'Front Delts': 'Shoulders', 'Rear Delts': 'Shoulders', 'Triceps': 'Triceps', 'Cardio': 'Cardio', 'Back': 'Back', 'Traps': 'Traps', 'Biceps': 'Biceps', 'Quads': 'Quads', 'Hamstrings': 'Hamstrings', 'Glutes': 'Glutes', 'Calves': 'Calves' };
+  slug(s) { return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''); }
+
+  buildLibrary() {
+    this.library = { push: [], pull: [], legs: [] };
+    this.libById = {};
+    this.defaultPlan = { push: [], pull: [], legs: [] };
+    ['push', 'pull', 'legs'].forEach(type => {
+      const seen = {};
+      const add = (o, sets) => {
+        const id = this.slug(o.name);
+        if (seen[id]) return id;
+        seen[id] = 1;
+        const item = { id: id, type: type, name: o.name, muscle: o.muscle, group: this.groupOf[o.muscle] || o.muscle,
+          img: o.img, tip: o.tip, sets: o.sets || sets || 3, reps: o.reps != null ? o.reps : 12, last: o.last != null ? o.last : 20, time: !!o.time, dur: o.dur || 0 };
+        this.library[type].push(item);
+        this.libById[id] = item;
+        return id;
+      };
+      this.exercisesByDay[type].forEach(ex => {
+        const id = add(ex, ex.sets);
+        this.defaultPlan[type].push(id);
+        (ex.alts || []).forEach(a => add(a, ex.sets));
+      });
+      (this.extraLib[type] || []).forEach(ex => add(ex, ex.sets));
+    });
+  }
+  ensureLib() { if (!this.library) this.buildLibrary(); }
+
+  slotBase(slot) { return slot.replace(/[12]$/, ''); }
+  slotDay(slot) { return slot.slice(-1) === '2' ? 2 : 1; }
+  allSlots() { return ['push1', 'push2', 'pull1', 'pull2', 'legs1', 'legs2']; }
+  defaultSlotPlan(slot) {
+    const base = this.slotBase(slot);
+    if (this.slotDay(slot) === 2) return (this.day2Default[base] || []).filter(id => this.libById[id]);
+    return this.defaultPlan[base].slice();
+  }
+  getMirror() { return this.state.mirror || { push: false, pull: false, legs: false }; }
+  effSlot(slot) {
+    if (this.slotDay(slot) === 2 && this.getMirror()[this.slotBase(slot)]) return this.slotBase(slot) + '1';
+    return slot;
+  }
+  getPlan() {
+    this.ensureLib();
+    const base = {};
+    this.allSlots().forEach(s => { base[s] = this.defaultSlotPlan(s); });
+    const p = this.state.plan;
+    if (p) Object.keys(p).forEach(s => { if (base[s] && Array.isArray(p[s])) base[s] = p[s]; });
+    return base;
+  }
+  planItems(slot) { return this.getPlan()[this.effSlot(slot)].map(id => this.libById[id]).filter(Boolean); }
+  persistPlan(plan) { this.setState({ plan: plan }); try { localStorage.setItem('slamppl_plan', JSON.stringify(plan)); } catch (e) {} }
+  persistMirror(m) { this.setState({ mirror: m }); try { localStorage.setItem('slamppl_mirror', JSON.stringify(m)); } catch (e) {} }
+  toggleMirror(base) { const m = this.getMirror(); this.persistMirror({ ...m, [base]: !m[base] }); }
+  toggleInPlan(slot, id) {
+    const plan = this.getPlan();
+    const list = plan[slot].slice();
+    const base = this.slotBase(slot);
+    const at = list.indexOf(id);
+    if (at >= 0) { if (list.length <= 1) return; list.splice(at, 1); }
+    else {
+      const order = this.library[base].map(x => x.id);
+      list.push(id);
+      list.sort((a, b) => order.indexOf(a) - order.indexOf(b));
+    }
+    this.persistPlan({ ...plan, [slot]: list });
+  }
+  swapInPlan(slot, oldId, newId) {
+    const plan = this.getPlan();
+    const list = plan[slot].map(id => id === oldId ? newId : id);
+    const ko = slot + ':' + oldId;
+    this.setState(s => { const logs = { ...s.logs }; delete logs[ko]; const doneTime = { ...s.doneTime }; delete doneTime[ko]; return { logs: logs, doneTime: doneTime, activeId: newId }; });
+    this.persistPlan({ ...plan, [slot]: list });
+  }
+
+  openSetup = () => this.setState(s => ({ setupOpen: true, draft: { ...this.getUser() } }));
+  closeSetup = () => this.setState({ setupOpen: false });
+  setDraft = (patch) => this.setState(s => ({ draft: { ...s.draft, ...patch } }));
+  saveSetup = () => {
+    const u = this.state.draft;
+    this.setState({ user: u, setupOpen: false });
+    try { localStorage.setItem('slamppl_user', JSON.stringify(u)); } catch (e) {}
+  };
+
+  go = (s) => this.setState({ screen: s });
+  selectDOW = (dow) => this.setState({ selDOW: dow, screen: 'today', activeId: null });
+  openEx = (slot, id) => this.setState({ activeSlot: slot, activeId: id, screen: 'exercise' });
+  back = () => this.setState({ screen: 'today', activeId: null });
+  openConfig = () => this.setState({ screen: 'config' });
+  backToProfile = () => this.setState({ screen: 'profile' });
+  setCfgTab = (t) => this.setState({ cfgTab: t });
+  setCfgDay = (d) => this.setState({ cfgDay: d });
+  resetPlan = () => { const p = {}; this.allSlots().forEach(s => { p[s] = this.defaultSlotPlan(s); }); this.persistPlan(p); };
+  setTheme = (t) => { this.setState({ theme: t }); try { localStorage.setItem('slamppl_theme', t); } catch (e) {} };
+  componentDidMount() {
+    try { const t = localStorage.getItem('slamppl_theme'); if (t) this.setState({ theme: t }); } catch (e) {}
+    try { const u = localStorage.getItem('slamppl_user'); if (u) this.setState({ user: JSON.parse(u) }); } catch (e) {}
+    try { const p = localStorage.getItem('slamppl_plan'); if (p) this.setState({ plan: JSON.parse(p) }); } catch (e) {}
+    try { const m = localStorage.getItem('slamppl_mirror'); if (m) this.setState({ mirror: JSON.parse(m) }); } catch (e) {}
+  }
+  signIn = () => this.setState({ signedIn: true, screen: 'today', sync: { status: 'done', label: 'Synced just now' } });
+  skipSignin = () => this.setState({ signedIn: false, screen: 'today' });
+  signOut = () => this.setState({ signedIn: false, screen: 'signin' });
+  syncNow = () => {
+    this.setState({ sync: { status: 'syncing', label: 'Syncing\u2026' } });
+    clearTimeout(this._s);
+    this._s = setTimeout(() => this.setState({ sync: { status: 'done', label: 'Synced just now' } }), 1400);
+  };
+  toggleWifi = () => this.setState(s => ({ wifiOnly: !s.wifiOnly }));
+
+  lk(slot, id) { return slot + ':' + id; }
+  getSets(slot, id) {
+    const ex = this.libById[id];
+    if (!ex || ex.time) return null;
+    const k = this.lk(slot, id);
+    if (this.state.logs[k]) return this.state.logs[k];
+    return Array.from({ length: ex.sets }, () => ({ w: ex.last, r: ex.reps, done: false }));
+  }
+  writeSets(slot, id, arr) { this.setState(s => ({ logs: { ...s.logs, [this.lk(slot, id)]: arr } })); }
+  adjW(slot, id, si, d) { const a = this.getSets(slot, id).map(x => ({ ...x })); a[si].w = Math.max(0, Math.round((a[si].w + d) * 2) / 2); this.writeSets(slot, id, a); }
+  adjR(slot, id, si, d) { const a = this.getSets(slot, id).map(x => ({ ...x })); a[si].r = Math.max(0, a[si].r + d); this.writeSets(slot, id, a); }
+  toggleSet(slot, id, si) {
+    const a = this.getSets(slot, id).map(x => ({ ...x }));
+    a[si].done = !a[si].done;
+    this.writeSets(slot, id, a);
+    if (a[si].done) this.startRest(90);
+  }
+  toggleTime(slot, id) { const k = this.lk(slot, id); this.setState(s => ({ doneTime: { ...s.doneTime, [k]: !s.doneTime[k] } })); }
+  isExDone(slot, id) {
+    const ex = this.libById[id];
+    if (!ex) return false;
+    if (ex.time) return !!this.state.doneTime[this.lk(slot, id)];
+    return this.getSets(slot, id).every(x => x.done);
+  }
+
+  startRest = (sec) => {
+    clearInterval(this._t);
+    this.setState({ rest: { open: true, total: sec, left: sec } });
+    this._t = setInterval(() => {
+      this.setState(s => {
+        const l = s.rest.left - 1;
+        if (l <= 0) { clearInterval(this._t); return { rest: { ...s.rest, left: 0 } }; }
+        return { rest: { ...s.rest, left: l } };
+      });
+    }, 1000);
+  };
+  addRest = (d) => this.setState(s => ({ rest: { ...s.rest, left: Math.max(0, s.rest.left + d), total: Math.max(s.rest.total, s.rest.left + d) } }));
+  skipRest = () => { clearInterval(this._t); this.setState(s => ({ rest: { ...s.rest, open: false } })); };
+  componentWillUnmount() { clearInterval(this._t); clearTimeout(this._s); }
+
+  renderVals() {
+    const units = this.units();
+    const theme = this.state.theme ?? (this.props.defaultTheme === 'dark' ? 'dark' : 'light');
+    const isDark = theme === 'dark';
+    const acc = Array.isArray(this.props.accent) && this.props.accent.length >= 2 ? this.props.accent : ['#f2543d', '#d63d4a'];
+    const light = '--bg:#faf7f3;--card:#ffffff;--card2:#f4ede9;--text:#241c17;--muted:#7c7069;--line:#ece3dc;--shadow:rgba(40,25,15,.12);';
+    const dark = '--bg:#161210;--card:#221b16;--card2:#2c241d;--text:#f5efe9;--muted:#a99a8f;--line:#332a23;--shadow:rgba(0,0,0,.6);';
+    const themeVars = (isDark ? dark : light) + '--hero1:' + acc[0] + ';--hero2:' + acc[1] + ';--good:#2fa565;';
+
+    const screen = this.state.screen ?? (this.props.startScreen === 'signin' ? 'signin' : 'today');
+    const showNav = ['today', 'progress', 'profile', 'sync'].indexOf(screen) >= 0;
+    const heroC = 'var(--hero1,#f2543d)';
+    const mutedC = 'var(--muted,#7c7069)';
+
+    // TODAY
+    const selType = this.dayType[this.state.selDOW];
+    const isRest = selType === 'rest';
+    const curSlot = isRest ? null : this.daySlot[this.state.selDOW];
+    const dayNum = curSlot ? this.slotDay(curSlot) : 1;
+    const rail = this.rail.map(r => {
+      const active = r.dow === this.state.selDOW;
+      return { dow: r.dowLabel, letter: r.l, active: active, inactive: !active, letterColor: r.l === 'R' ? mutedC : heroC, onClick: () => this.selectDOW(r.dow) };
+    });
+    let items = [], doneCount = 0;
+    if (!isRest) {
+      const list = this.planItems(curSlot);
+      items = list.map((ex) => {
+        const done = this.isExDone(curSlot, ex.id);
+        if (done) doneCount++;
+        const setsReps = ex.time ? (ex.dur + ' min') : (ex.sets + ' × ' + ex.reps);
+        const meta = ex.time ? 'Incline walk · finisher' : (ex.muscle + ' · Last ' + this.dispW(ex.last) + ' ' + units);
+        return { name: ex.name, muscle: ex.muscle, img: ex.img, hasImg: true, noImg: false, setsReps: setsReps, metaLine: meta, done: done, actionText: done ? 'Done' : 'Log sets', onClick: () => this.openEx(curSlot, ex.id) };
+      });
+    }
+    const total = items.length;
+    const today = {
+      dayName: this.typeName[selType],
+      subtitle: this.typeSub[selType] + (isRest ? '' : ' · Slam Fitness'),
+      isRest: isRest,
+      hasItems: !isRest,
+      showDayTag: !isRest,
+      dayTag: 'Day ' + dayNum,
+      rail: rail,
+      items: items,
+      countText: isRest ? '—' : (doneCount + '/' + total),
+      ctaText: doneCount === 0 ? 'Start Workout' : (doneCount >= total ? 'Finish & Save ✓' : 'Continue Workout')
+    };
+
+    // EXERCISE DETAIL
+    let ex = null;
+    const activeId = this.state.activeId;
+    if (screen === 'exercise' && activeId && this.libById && this.libById[activeId]) {
+      const e = this.libById[activeId];
+      const exType = e.type;
+      const aSlot = this.state.activeSlot || (exType + '1');
+      const eff = this.effSlot(aSlot);
+      const planIds = this.getPlan()[eff];
+      const inPlan = planIds.indexOf(activeId) >= 0;
+      const swapOpts = this.library[exType].filter(o => o.group === e.group);
+      const swaps = swapOpts.map((o) => ({
+        name: o.name, img: o.img, active: o.id === activeId,
+        ring: o.id === activeId ? 'var(--hero1,#f2543d)' : 'transparent',
+        nameColor: o.id === activeId ? 'var(--hero1,#f2543d)' : 'var(--muted,#7c7069)',
+        onPick: () => (o.id === activeId ? null : (inPlan ? this.swapInPlan(eff, activeId, o.id) : this.openEx(aSlot, o.id)))
+      }));
+      if (e.time) {
+        const td = this.isExDone(aSlot, activeId);
+        ex = {
+          name: e.name, muscle: e.muscle, img: e.img, tip: e.tip, isTime: true, hasSets: false,
+          swaps: swaps, hasSwaps: swaps.length > 1,
+          timeText: (e.dur || 12) + ':00',
+          onTimeToggle: () => this.toggleTime(aSlot, activeId),
+          timeBtnText: td ? 'Completed ✓' : 'Mark complete',
+          timeBtnBg: td ? 'var(--good,#2fa565)' : 'linear-gradient(135deg,var(--hero1,#f2543d),var(--hero2,#d63d4a))',
+          timeBtnColor: '#fff'
+        };
+      } else {
+        const sets = this.getSets(aSlot, activeId);
+        ex = {
+          name: e.name, muscle: e.muscle, img: e.img, tip: e.tip, isTime: false, hasSets: true,
+          swaps: swaps, hasSwaps: swaps.length > 1,
+          targetReps: e.reps,
+          onRest: () => this.startRest(90),
+          sets: sets.map((s, si) => ({
+            n: si + 1,
+            wText: this.dispW(s.w) + ' ' + units,
+            rText: s.r,
+            done: s.done,
+            borderColor: s.done ? 'var(--good,#2fa565)' : 'var(--line,#ece3dc)',
+            checkBg: s.done ? 'var(--good,#2fa565)' : 'transparent',
+            checkBorder: s.done ? 'var(--good,#2fa565)' : 'var(--line,#d8cfc7)',
+            onWm: () => this.adjW(aSlot, activeId, si, -this.wStep()),
+            onWp: () => this.adjW(aSlot, activeId, si, this.wStep()),
+            onRm: () => this.adjR(aSlot, activeId, si, -1),
+            onRp: () => this.adjR(aSlot, activeId, si, 1),
+            onToggle: () => this.toggleSet(aSlot, activeId, si)
+          }))
+        };
+      }
+    }
+    if (!ex) ex = { name: '', muscle: '', img: '', tip: '', isTime: false, hasSets: true, swaps: [], hasSwaps: false, targetReps: 0, sets: [], onRest: () => {} };
+
+    // PROGRESS
+    const bw = [115, 114.3, 113.6, 113.1, 112.2, 111.5, 110.9, 110.2];
+    const minB = 108, maxB = 116, cw = 232, ch = 84, ox = 8, oy = 10;
+    const pts = bw.map((v, i) => [ox + i * (cw / (bw.length - 1)), oy + ch - ((v - minB) / (maxB - minB)) * ch]);
+    const bwLine = pts.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+    let bwArea = 'M ' + ox + ',' + (oy + ch);
+    pts.forEach(p => { bwArea += ' L ' + p[0].toFixed(1) + ',' + p[1].toFixed(1); });
+    bwArea += ' L ' + (ox + cw) + ',' + (oy + ch) + ' Z';
+    const vol = [8200, 9100, 8800, 9600, 10200, 9900, 10800, 11200], vmax = 12000;
+    const bars = vol.map((v, i) => ({ h: Math.round(v / vmax * 88) + 'px', bg: i === vol.length - 1 ? 'linear-gradient(180deg,var(--hero1,#f2543d),var(--hero2,#d63d4a))' : 'var(--card2,#e9ddd4)' }));
+    const dots = Array.from({ length: 35 }, (_, i) => {
+      const on = (i % 7 !== 6) && i !== 3 && i !== 17 && i !== 24;
+      return { bg: on ? 'var(--good,#2fa565)' : 'var(--card2,#f0e8e2)' };
+    });
+    const prog = {
+      bwCurrent: this.dispW(110.2) + ' ' + units, bwDelta: '−' + (units === 'lb' ? '10.6' : '4.8') + ' ' + units, bwGoal: this.dispW(95) + ' ' + units,
+      bwLine: bwLine, bwArea: bwArea, bwDotX: pts[pts.length - 1][0].toFixed(1), bwDotY: pts[pts.length - 1][1].toFixed(1),
+      streak: 12, dots: dots, bars: bars, volLast: '11.2k ' + units,
+      prs: [
+        { name: 'Bench Press', val: this.dispW(62.5) + ' ' + units, sub: '↑ 2.5 this month' },
+        { name: 'Back Squat', val: this.dispW(82.5) + ' ' + units, sub: '↑ 5.0 this month' },
+        { name: 'Deadlift', val: this.dispW(95) + ' ' + units, sub: '↑ 7.5 this month' }
+      ]
+    };
+
+    // PROFILE
+    const on = 'var(--card,#fff)';
+    const u = this.getUser();
+    const bmiVal = u.weightKg / Math.pow(u.heightCm / 100, 2);
+    const bmiCat = bmiVal < 18.5 ? 'low' : (bmiVal < 25 ? 'healthy' : (bmiVal < 30 ? 'high' : 'obese'));
+    const ft = Math.floor(u.heightCm / 30.48), inch = Math.round((u.heightCm / 2.54) - ft * 12);
+    const profile = {
+      name: u.name,
+      gym: u.gym,
+      initial: (u.name || 'A').trim().charAt(0).toUpperCase(),
+      goal: u.goal,
+      height: units === 'lb' ? (ft + "'" + inch + '"') : (u.heightCm + ' cm'),
+      weight: this.dispW(u.weightKg) + ' ' + units,
+      target: this.dispW(u.targetKg) + ' ' + units,
+      bmi: bmiVal.toFixed(1),
+      bmiCat: bmiCat,
+      units: units === 'lb' ? 'Pounds (lb)' : 'Kilograms (kg)',
+      onEdit: this.openSetup,
+      onConfig: this.openConfig,
+      planCount: this.getPlan()[this.state.selDOW === 0 ? 'push1' : this.daySlot[this.state.selDOW]].length,
+      libTotal: this.library.push.length + this.library.pull.length + this.library.legs.length,
+      setLight: () => this.setTheme('light'),
+      setDark: () => this.setTheme('dark'),
+      lightBg: !isDark ? on : 'transparent',
+      darkBg: isDark ? on : 'transparent',
+      lightShadow: !isDark ? '0 2px 6px rgba(0,0,0,.12)' : 'none',
+      darkShadow: isDark ? '0 2px 6px rgba(0,0,0,.4)' : 'none',
+      lightColor: !isDark ? heroC : mutedC,
+      darkColor: isDark ? heroC : mutedC,
+      syncSub: this.state.signedIn ? 'karthik@gmail.com' : 'Not connected',
+      syncDot: this.state.signedIn ? 'var(--good,#2fa565)' : 'var(--muted,#7c7069)',
+      onSignOut: this.signOut
+    };
+
+    // SETUP SHEET
+    const dr = this.state.draft || this.getUser();
+    const goalOpts = ['Fat loss + muscle', 'Fat loss', 'Muscle gain', 'Maintain'].map(g => ({
+      label: g, active: dr.goal === g,
+      bg: dr.goal === g ? 'linear-gradient(135deg,var(--hero1,#f2543d),var(--hero2,#d63d4a))' : 'var(--card2,#f4ede9)',
+      color: dr.goal === g ? '#fff' : 'var(--muted,#7c7069)',
+      onPick: () => this.setDraft({ goal: g })
+    }));
+    const unitOpts = [['kg', 'Kilograms'], ['lb', 'Pounds']].map(([v, l]) => ({
+      label: l, active: dr.units === v,
+      bg: dr.units === v ? 'var(--card,#fff)' : 'transparent',
+      shadow: dr.units === v ? '0 2px 6px rgba(0,0,0,.14)' : 'none',
+      color: dr.units === v ? 'var(--hero1,#f2543d)' : 'var(--muted,#7c7069)',
+      onPick: () => this.setDraft({ units: v })
+    }));
+    const setup = {
+      open: this.state.setupOpen,
+      name: dr.name,
+      onName: (e) => this.setDraft({ name: e.target.value }),
+      heightText: dr.heightCm + ' cm',
+      hMinus: () => this.setDraft({ heightCm: Math.max(120, dr.heightCm - 1) }),
+      hPlus: () => this.setDraft({ heightCm: Math.min(230, dr.heightCm + 1) }),
+      weightText: dr.weightKg + ' kg',
+      wMinus: () => this.setDraft({ weightKg: Math.max(30, Math.round((dr.weightKg - 0.5) * 2) / 2) }),
+      wPlus: () => this.setDraft({ weightKg: Math.min(250, Math.round((dr.weightKg + 0.5) * 2) / 2) }),
+      targetText: dr.targetKg + ' kg',
+      tMinus: () => this.setDraft({ targetKg: Math.max(30, Math.round((dr.targetKg - 0.5) * 2) / 2) }),
+      tPlus: () => this.setDraft({ targetKg: Math.min(250, Math.round((dr.targetKg + 0.5) * 2) / 2) }),
+      goals: goalOpts,
+      unitsOpts: unitOpts,
+      onSave: this.saveSetup,
+      onClose: this.closeSetup
+    };
+
+    // CONFIG
+    const cfgTab = this.state.cfgTab;
+    const cfgDay = this.state.cfgDay || 1;
+    const cfgMirror = this.getMirror()[cfgTab];
+    const isMirrored = cfgDay === 2 && cfgMirror;
+    const editSlot = isMirrored ? cfgTab + '1' : cfgTab + cfgDay;
+    const cfgPlan = this.getPlan()[editSlot];
+    const cfgTabs = [['push', 'Push'], ['pull', 'Pull'], ['legs', 'Legs']].map(([t, l]) => ({
+      key: t, label: l, active: cfgTab === t,
+      bg: cfgTab === t ? 'linear-gradient(135deg,var(--hero1,#f2543d),var(--hero2,#d63d4a))' : 'var(--card,#fff)',
+      color: cfgTab === t ? '#fff' : 'var(--muted,#7c7069)',
+      onClick: () => this.setCfgTab(t)
+    }));
+    const cfgDays = [1, 2].map(d => ({
+      n: d, label: 'Day ' + d, active: cfgDay === d,
+      bg: cfgDay === d ? 'var(--card,#fff)' : 'transparent',
+      shadow: cfgDay === d ? '0 2px 6px rgba(0,0,0,.12)' : 'none',
+      color: cfgDay === d ? 'var(--hero1,#f2543d)' : 'var(--muted,#7c7069)',
+      onClick: () => this.setCfgDay(d)
+    }));
+    const groupsOrder = [], byGroup = {};
+    this.library[cfgTab].forEach(item => {
+      if (!byGroup[item.group]) { byGroup[item.group] = []; groupsOrder.push(item.group); }
+      const inPlan = cfgPlan.indexOf(item.id) >= 0;
+      byGroup[item.group].push({
+        id: item.id, name: item.name, muscle: item.muscle, img: item.img, inPlan: inPlan, notInPlan: !inPlan,
+        cardBorder: inPlan ? 'var(--hero1,#f2543d)' : 'var(--line,#ece3dc)',
+        checkBg: inPlan ? 'var(--hero1,#f2543d)' : 'rgba(0,0,0,0)',
+        checkBorder: inPlan ? 'var(--hero1,#f2543d)' : 'var(--line,#cfc6bd)',
+        onToggle: () => (isMirrored ? null : this.toggleInPlan(editSlot, item.id))
+      });
+    });
+    const config = {
+      tabs: cfgTabs,
+      days: cfgDays,
+      mirror: !!cfgMirror,
+      mirrorTrackBg: cfgMirror ? 'linear-gradient(90deg,var(--hero1,#f2543d),var(--hero2,#d63d4a))' : 'var(--line,#d8cfc7)',
+      mirrorKnobLeft: cfgMirror ? '22px' : '3px',
+      onToggleMirror: () => this.toggleMirror(cfgTab),
+      isMirrored: isMirrored,
+      notMirrored: !isMirrored,
+      groups: groupsOrder.map(g => ({ name: g, count: byGroup[g].length, items: byGroup[g] })),
+      count: cfgPlan.length,
+      total: this.library[cfgTab].length,
+      dayLabel: this.typeName[cfgTab] + ' · Day ' + cfgDay,
+      onBack: this.backToProfile,
+      onReset: this.resetPlan
+    };
+
+    const syncing = this.state.sync.status === 'syncing';
+    return {
+      themeVars: themeVars,
+      setup: setup,
+      showConfig: screen === 'config',
+      config: config,
+      showSignin: screen === 'signin',
+      showToday: screen === 'today',
+      showExercise: screen === 'exercise',
+      showProgress: screen === 'progress',
+      showProfile: screen === 'profile',
+      showSync: screen === 'sync',
+      showNav: showNav,
+      nav: {
+        todayColor: screen === 'today' ? heroC : mutedC,
+        progressColor: screen === 'progress' ? heroC : mutedC,
+        profileColor: screen === 'profile' ? heroC : mutedC
+      },
+      goToday: () => this.go('today'), goProgress: () => this.go('progress'), goProfile: () => this.go('profile'), goSync: () => this.go('sync'),
+      back: this.back,
+      signIn: this.signIn, skipSignin: this.skipSignin, signOut: this.signOut,
+      startFirst: () => { const n = items.findIndex(x => !x.done); this.openEx(n < 0 ? 0 : n); },
+      today: today,
+      ex: ex,
+      prog: prog,
+      profile: profile,
+      syncShort: syncing ? 'Syncing' : 'Synced',
+      syncLabel: this.state.sync.label,
+      syncing: syncing, notSyncing: !syncing,
+      syncNow: this.syncNow, toggleWifi: this.toggleWifi,
+      wifiBg: this.state.wifiOnly ? 'linear-gradient(90deg,var(--hero1,#f2543d),var(--hero2,#d63d4a))' : 'var(--line,#d8cfc7)',
+      wifiLeft: this.state.wifiOnly ? '22px' : '3px',
+      rest: {
+        open: this.state.rest.open,
+        text: this.state.rest.left,
+        circ: (2 * Math.PI * 78).toFixed(1),
+        offset: (2 * Math.PI * 78 * (1 - this.state.rest.left / this.state.rest.total)).toFixed(1),
+        onAdd: () => this.addRest(15), onSub: () => this.addRest(-15), onSkip: this.skipRest
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>
