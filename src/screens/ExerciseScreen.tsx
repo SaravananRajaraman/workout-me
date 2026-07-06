@@ -1,3 +1,4 @@
+import { assetUrl } from '../lib/assetPath';
 import { useStore } from '../state/store';
 
 export function ExerciseScreen() {
@@ -19,7 +20,7 @@ export function ExerciseScreen() {
         <div
           role="img"
           aria-label={ex.name}
-          style={{ width: '100%', height: '100%', backgroundColor: 'var(--card2)', backgroundImage: `url(${ex.img})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+          style={{ width: '100%', height: '100%', backgroundColor: 'var(--card2)', backgroundImage: `url(${assetUrl(ex.img)})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
         />
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,rgba(0,0,0,.28) 0%,rgba(0,0,0,.05) 40%,rgba(0,0,0,.66) 100%)' }} />
         <div
@@ -70,7 +71,7 @@ export function ExerciseScreen() {
                     style={{ flex: 'none', width: 96, cursor: 'pointer' }}
                   >
                     <div style={{ position: 'relative', height: 66, borderRadius: 13, overflow: 'hidden', border: `2.5px solid ${active ? 'var(--hero1)' : 'transparent'}` }}>
-                      <div role="img" aria-label={o.name} style={{ width: '100%', height: '100%', backgroundColor: 'var(--card2)', backgroundImage: `url(${o.img})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
+                      <div role="img" aria-label={o.name} style={{ width: '100%', height: '100%', backgroundColor: 'var(--card2)', backgroundImage: `url(${assetUrl(o.img)})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
                       {active && (
                         <div style={{ position: 'absolute', top: 4, right: 4, width: 18, height: 18, borderRadius: '50%', background: 'var(--hero1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           <span style={{ color: '#fff', fontSize: 10, fontWeight: 900 }}>✓</span>

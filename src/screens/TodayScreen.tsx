@@ -1,4 +1,5 @@
 import { daySlotByDow, dayTypeByDow, dowLabels, slotDayNum, typeName, typeSub } from '../data/exercises';
+import { assetUrl } from '../lib/assetPath';
 import { useStore } from '../state/store';
 
 export function TodayScreen() {
@@ -142,7 +143,7 @@ export function TodayScreen() {
                 <div
                   role="img"
                   aria-label={ex.name}
-                  style={{ width: '100%', height: '100%', backgroundColor: 'var(--card2)', backgroundImage: `url(${ex.img})`, backgroundSize: 'cover', backgroundPosition: 'center', filter: 'saturate(1.05)' }}
+                  style={{ width: '100%', height: '100%', backgroundColor: 'var(--card2)', backgroundImage: `url(${assetUrl(ex.img)})`, backgroundSize: 'cover', backgroundPosition: 'center', filter: 'saturate(1.05)' }}
                 />
                 <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,rgba(0,0,0,.05) 30%,rgba(0,0,0,.72) 100%)' }} />
                 <span style={{ position: 'absolute', top: 10, left: 10, background: 'rgba(255,255,255,.92)', color: 'var(--hero1)', fontSize: 9.5, fontWeight: 800, padding: '4px 9px', borderRadius: 9, letterSpacing: '.03em', textTransform: 'uppercase' }}>
