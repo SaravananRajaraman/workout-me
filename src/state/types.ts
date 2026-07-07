@@ -1,4 +1,4 @@
-import type { DayType, SetLog, Slot } from '../data/types';
+import type { DayType, ScheduleDay, SetLog } from '../data/types';
 import type { Units } from '../lib/units';
 
 export type Screen = 'signin' | 'today' | 'exercise' | 'progress' | 'profile' | 'config' | 'sync';
@@ -20,6 +20,12 @@ export interface RestState {
 }
 
 export type SyncStatus = 'idle' | 'syncing' | 'done' | 'error';
+
+/** The mode the user picked for a given calendar day. */
+export interface DaySelection {
+  date: string; // YYYY-MM-DD
+  type: ScheduleDay;
+}
 
 export interface SyncMeta {
   status: SyncStatus;
@@ -44,7 +50,6 @@ export interface Session {
   id: string;
   date: string; // YYYY-MM-DD
   dow: number;
-  slot: Slot;
   type: DayType;
   items: SessionItem[];
   totalVolume: number;
@@ -59,13 +64,11 @@ export interface AppState {
   screen: Screen;
   onboarded: boolean;
   theme: 'light' | 'dark';
-  selDOW: number;
-  activeSlot: Slot | null;
+  day: DaySelection;
+  activeType: DayType | null;
   activeId: string | null;
-  plan: Partial<Record<Slot, string[]>>;
-  mirror: Partial<Record<DayType, boolean>>;
+  plan: Record<string, string[]>;
   cfgTab: DayType;
-  cfgDay: 1 | 2;
   logs: Record<string, SetLog[]>;
   doneTime: Record<string, boolean>;
   signedIn: boolean;

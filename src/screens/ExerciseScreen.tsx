@@ -2,14 +2,13 @@ import { assetUrl } from '../lib/assetPath';
 import { useStore } from '../state/store';
 
 export function ExerciseScreen() {
-  const { state, libById, back, effSlot, getPlan, library, swapInPlan, openEx, getSets, toggleTime, toggleSet, adjW, adjR, startRest, dispW, units, isExDone, wStep } = useStore();
+  const { state, libById, back, getPlan, library, swapInPlan, openEx, getSets, toggleTime, toggleSet, adjW, adjR, startRest, dispW, units, isExDone, wStep } = useStore();
   const activeId = state.activeId;
-  const activeSlot = state.activeSlot;
-  if (!activeId || !activeSlot || !libById[activeId]) return null;
+  const activeType = state.activeType;
+  if (!activeId || !activeType || !libById[activeId]) return null;
 
   const ex = libById[activeId];
-  const eff = effSlot(activeSlot);
-  const planIds = getPlan()[eff];
+  const planIds = getPlan()[activeType];
   const inPlan = planIds.includes(activeId);
   const swapOpts = library[ex.type].filter((o) => o.group === ex.group);
   const hasSwaps = swapOpts.length > 1;
@@ -65,8 +64,8 @@ export function ExerciseScreen() {
                     key={o.id}
                     onClick={() => {
                       if (active) return;
-                      if (inPlan) swapInPlan(eff, activeId, o.id);
-                      else openEx(activeSlot, o.id);
+                      if (inPlan) swapInPlan(activeType, activeId, o.id);
+                      else openEx(activeType, o.id);
                     }}
                     style={{ flex: 'none', width: 96, cursor: 'pointer' }}
                   >
@@ -87,18 +86,17 @@ export function ExerciseScreen() {
         )}
 
         {ex.time ? (
-          <TimeBlock exId={ex.id} slot={activeSlot} dur={ex.dur} isDone={isExDone(activeSlot, ex.id)} onToggle={() => toggleTime(activeSlot, ex.id)} />
+          <TimeBlock exId={ex.id} dur={ex.dur} isDone={isExDone(activeType, ex.id)} onToggle={() => toggleTime(activeType, ex.id)} />
         ) : (
           <SetsBlock
-            slot={activeSlot}
             exId={ex.id}
             targetReps={ex.reps}
-            sets={getSets(activeSlot, ex.id) ?? []}
+            sets={getSets(activeType, ex.id) ?? []}
             dispW={dispW}
             units={units()}
-            onToggle={(si) => toggleSet(activeSlot, ex.id, si)}
-            onAdjW={(si, d) => adjW(activeSlot, ex.id, si, d * wStep())}
-            onAdjR={(si, d) => adjR(activeSlot, ex.id, si, d)}
+            onToggle={(si) => toggleSet(activeType, ex.id, si)}
+            onAdjW={(si, d) => adjW(activeType, ex.id, si, d * wStep())}
+            onAdjR={(si, d) => adjR(activeType, ex.id, si, d)}
             onRest={() => startRest(90)}
           />
         )}
@@ -107,7 +105,7 @@ export function ExerciseScreen() {
   );
 }
 
-function TimeBlock({ dur, isDone, onToggle }: { exId: string; slot: string; dur: number; isDone: boolean; onToggle: () => void }) {
+function TimeBlock({ dur, isDone, onToggle }: { exId: string; dur: number; isDone: boolean; onToggle: () => void }) {
   return (
     <div style={{ background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 18, padding: 22, textAlign: 'center', boxShadow: '0 8px 20px -14px var(--shadow)' }}>
       <div style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 800, fontSize: 40, color: 'var(--text)' }}>{dur}:00</div>
@@ -135,7 +133,6 @@ function TimeBlock({ dur, isDone, onToggle }: { exId: string; slot: string; dur:
 }
 
 function SetsBlock({
-  slot,
   targetReps,
   sets,
   dispW,
@@ -145,7 +142,6 @@ function SetsBlock({
   onAdjR,
   onRest,
 }: {
-  slot: string;
   exId: string;
   targetReps: number;
   sets: { w: number; r: number; done: boolean }[];
@@ -156,7 +152,6 @@ function SetsBlock({
   onAdjR: (si: number, d: number) => void;
   onRest: () => void;
 }) {
-  void slot;
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

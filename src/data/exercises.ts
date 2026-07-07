@@ -1,4 +1,4 @@
-import type { DayType, ExerciseSeed, LibraryExercise, ScheduleDay, Slot, WeekSchedule } from './types';
+import type { DayType, ExerciseSeed, LibraryExercise, ScheduleDay } from './types';
 
 export const exercisesByDay: Record<DayType, ExerciseSeed[]> = {
   push: [
@@ -75,54 +75,18 @@ export const extraLib: Record<DayType, ExerciseSeed[]> = {
   ],
 };
 
-export const day2Default: Record<DayType, string[]> = {
-  push: ['dumbbell-bench-press', 'incline-barbell-press', 'standing-barbell-press', 'machine-chest-press', 'arnold-press', 'ez-bar-skullcrusher', 'chest-dip'],
-  pull: ['romanian-deadlift', 'pull-up', 'bent-over-barbell-row', 'barbell-shrug', 'reverse-flyes', 'preacher-curl', 'hammer-curl'],
-  legs: ['front-squat', 'hack-squat', 'lying-leg-curl', 'barbell-hip-thrust', 'goblet-squat', 'seated-calf-raise'],
-};
-
 export const groupOf: Record<string, string> = {
   Chest: 'Chest', 'Upper Chest': 'Chest', Shoulders: 'Shoulders', 'Side Delts': 'Shoulders', 'Front Delts': 'Shoulders', 'Rear Delts': 'Shoulders',
   Triceps: 'Triceps', Cardio: 'Cardio', Back: 'Back', Traps: 'Traps', Biceps: 'Biceps', Quads: 'Quads', Hamstrings: 'Hamstrings', Glutes: 'Glutes', Calves: 'Calves',
 };
 
-export const defaultSchedule: WeekSchedule = { 0: 'rest', 1: 'push', 2: 'pull', 3: 'legs', 4: 'push', 5: 'pull', 6: 'legs' };
 export const typeName: Record<ScheduleDay, string> = { push: 'Push Day', pull: 'Pull Day', legs: 'Leg Day', rest: 'Rest Day' };
 export const typeSub: Record<ScheduleDay, string> = { push: 'Chest · Shoulders · Triceps', pull: 'Back · Traps · Biceps', legs: 'Quads · Glutes · Calves', rest: 'Recover & grow' };
 
-/** Week in display order (Monday-first), with short day names. */
-export const weekDows: { dow: number; label: string }[] = [
-  { dow: 1, label: 'Mon' }, { dow: 2, label: 'Tue' }, { dow: 3, label: 'Wed' },
-  { dow: 4, label: 'Thu' }, { dow: 5, label: 'Fri' }, { dow: 6, label: 'Sat' },
-  { dow: 0, label: 'Sun' },
-];
-
-export interface WeekView {
-  typeByDow: Record<number, ScheduleDay>;
-  slotByDow: Partial<Record<number, Slot>>;
-  labels: { dow: number; letter: string; label: string }[];
-}
-
-/**
- * Expands a per-weekday schedule into the day-type/slot mappings the app runs on.
- * Occurrences of a type within the week (Mon→Sun) alternate between its Day 1
- * and Day 2 slots, so the existing two-variant plan system keeps working.
- */
-export function deriveWeek(schedule: WeekSchedule): WeekView {
-  const typeByDow: Record<number, ScheduleDay> = {};
-  const slotByDow: Partial<Record<number, Slot>> = {};
-  const counts: Record<DayType, number> = { push: 0, pull: 0, legs: 0 };
-  const labels: WeekView['labels'] = [];
-  weekDows.forEach(({ dow, label }) => {
-    const type: ScheduleDay = schedule[dow] ?? 'rest';
-    typeByDow[dow] = type;
-    if (type !== 'rest') {
-      counts[type] += 1;
-      slotByDow[dow] = `${type}${counts[type] % 2 === 1 ? 1 : 2}` as Slot;
-    }
-    labels.push({ dow, letter: type === 'rest' ? 'R' : type === 'legs' ? 'L' : 'P', label });
-  });
-  return { typeByDow, slotByDow, labels };
+/** PPL rotation: the workout type that naturally follows the given one. */
+export function nextType(type: DayType): DayType {
+  const cycle: DayType[] = ['push', 'pull', 'legs'];
+  return cycle[(cycle.indexOf(type) + 1) % cycle.length];
 }
 
 export function slug(s: string): string {
@@ -175,10 +139,4 @@ export function buildLibrary(): WorkoutLibrary {
   return { library, libById, defaultPlan };
 }
 
-export function slotBase(slot: Slot): DayType {
-  return slot.replace(/[12]$/, '') as DayType;
-}
-export function slotDayNum(slot: Slot): 1 | 2 {
-  return slot.slice(-1) === '2' ? 2 : 1;
-}
-export const allSlots: Slot[] = ['push1', 'push2', 'pull1', 'pull2', 'legs1', 'legs2'];
+export const allTypes: DayType[] = ['push', 'pull', 'legs'];

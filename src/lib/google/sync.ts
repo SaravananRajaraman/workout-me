@@ -1,19 +1,17 @@
 import { createSpreadsheet, findSpreadsheet, getValues, renameFile, updateValues } from './api';
 import type { BodyweightEntry, Session, UserProfile } from '../../state/types';
-import type { DayType, Slot, WeekSchedule } from '../../data/types';
+import type { DayType } from '../../data/types';
 
 const FILE_TITLE = 'Workout Me Data';
 const OLD_FILE_TITLE = 'Slam PPL Data';
 const TAB_TITLES = ['Profile', 'Plan', 'Sessions', 'Bodyweight'];
 
-const SESSION_HEADER = ['id', 'date', 'dow', 'slot', 'type', 'exerciseId', 'name', 'muscle', 'setIndex', 'weight', 'reps'];
+const SESSION_HEADER = ['id', 'date', 'dow', 'type', 'exerciseId', 'name', 'muscle', 'setIndex', 'weight', 'reps'];
 const BODYWEIGHT_HEADER = ['date', 'kg'];
 
 export interface RemoteState {
   profileMap: Record<string, string>;
-  plan: Partial<Record<Slot, string[]>>;
-  mirror: Partial<Record<DayType, boolean>>;
-  schedule: Partial<WeekSchedule>;
+  plan: Record<string, string[]>;
   sessions: Session[];
   bodyweight: BodyweightEntry[];
 }
@@ -36,9 +34,7 @@ export async function pushAll(
   data: {
     user: UserProfile | null;
     theme: string;
-    plan: Partial<Record<Slot, string[]>>;
-    mirror: Partial<Record<DayType, boolean>>;
-    schedule: Partial<WeekSchedule>;
+    plan: Record<string, string[]>;
     sessions: Session[];
     bodyweight: BodyweightEntry[];
   },
@@ -58,14 +54,12 @@ export async function pushAll(
   const planRows = [
     ['key', 'value'],
     ['plan_json', JSON.stringify(data.plan ?? {})],
-    ['mirror_json', JSON.stringify(data.mirror ?? {})],
-    ['schedule_json', JSON.stringify(data.schedule ?? {})],
   ];
   const sessionRows: (string | number)[][] = [SESSION_HEADER];
   data.sessions.forEach((s) => {
     s.items.forEach((item) => {
       item.sets.forEach((set, i) => {
-        sessionRows.push([s.id, s.date, s.dow, s.slot, s.type, item.exerciseId, item.name, item.muscle, i + 1, set.w, set.r]);
+        sessionRows.push([s.id, s.date, s.dow, s.type, item.exerciseId, item.name, item.muscle, i + 1, set.w, set.r]);
       });
     });
   });
@@ -74,7 +68,7 @@ export async function pushAll(
 
   await Promise.all([
     updateValues(accessToken, spreadsheetId, 'Profile!A1:B9', profileRows),
-    updateValues(accessToken, spreadsheetId, 'Plan!A1:B4', planRows),
+    updateValues(accessToken, spreadsheetId, 'Plan!A1:B2', planRows),
     updateValues(accessToken, spreadsheetId, `Sessions!A1:K${sessionRows.length + 1}`, sessionRows),
     updateValues(accessToken, spreadsheetId, `Bodyweight!A1:B${bwRows.length + 1}`, bwRows),
   ]);
@@ -83,7 +77,7 @@ export async function pushAll(
 export async function pullAll(accessToken: string, spreadsheetId: string): Promise<RemoteState> {
   const [profileRows, planRows, sessionRows, bwRows] = await Promise.all([
     getValues(accessToken, spreadsheetId, 'Profile!A1:B9'),
-    getValues(accessToken, spreadsheetId, 'Plan!A1:B4'),
+    getValues(accessToken, spreadsheetId, 'Plan!A1:B2'),
     getValues(accessToken, spreadsheetId, 'Sessions!A1:K200000'),
     getValues(accessToken, spreadsheetId, 'Bodyweight!A1:B20000'),
   ]);
@@ -93,9 +87,7 @@ export async function pullAll(accessToken: string, spreadsheetId: string): Promi
     if (k) profileMap[k] = v ?? '';
   });
 
-  let plan: Partial<Record<Slot, string[]>> = {};
-  let mirror: Partial<Record<DayType, boolean>> = {};
-  let schedule: Partial<WeekSchedule> = {};
+  let plan: Record<string, string[]> = {};
   planRows.slice(1).forEach(([k, v]) => {
     if (k === 'plan_json' && v) {
       try {
@@ -104,25 +96,15 @@ export async function pullAll(accessToken: string, spreadsheetId: string): Promi
         /* ignore malformed remote data */
       }
     }
-    if (k === 'mirror_json' && v) {
-      try {
-        mirror = JSON.parse(v);
-      } catch {
-        /* ignore malformed remote data */
-      }
-    }
-    if (k === 'schedule_json' && v) {
-      try {
-        schedule = JSON.parse(v);
-      } catch {
-        /* ignore malformed remote data */
-      }
-    }
   });
 
+  // Sheets written before the day-variant system was removed have an extra
+  // "slot" column (e.g. "push1") between dow and type.
+  const legacySessionLayout = sessionRows[0]?.[3] === 'slot';
   const sessionsById = new Map<string, Session>();
-  sessionRows.slice(1).forEach((row) => {
-    const [id, date, dowStr, slot, type, exerciseId, name, muscle, setIdxStr, wStr, rStr] = row;
+  sessionRows.slice(1).forEach((rawRow) => {
+    const row = legacySessionLayout ? [...rawRow.slice(0, 3), ...rawRow.slice(4)] : rawRow;
+    const [id, date, dowStr, type, exerciseId, name, muscle, setIdxStr, wStr, rStr] = row;
     if (!id) return;
     let session = sessionsById.get(id);
     if (!session) {
@@ -130,7 +112,6 @@ export async function pullAll(accessToken: string, spreadsheetId: string): Promi
         id,
         date,
         dow: Number(dowStr) || 0,
-        slot: slot as Slot,
         type: type as DayType,
         items: [],
         totalVolume: 0,
@@ -163,8 +144,6 @@ export async function pullAll(accessToken: string, spreadsheetId: string): Promi
   return {
     profileMap,
     plan,
-    mirror,
-    schedule,
     sessions: Array.from(sessionsById.values()),
     bodyweight,
   };

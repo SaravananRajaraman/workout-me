@@ -1,5 +1,4 @@
-import type { DayType, ScheduleDay, Slot } from '../data/types';
-import { weekDows } from '../data/exercises';
+import type { DayType } from '../data/types';
 import { assetUrl } from '../lib/assetPath';
 import { useStore } from '../state/store';
 
@@ -9,22 +8,11 @@ const TABS: { key: DayType; label: string }[] = [
   { key: 'legs', label: 'Legs' },
 ];
 
-const SCHEDULE_OPTIONS: { key: ScheduleDay; label: string }[] = [
-  { key: 'push', label: 'Push' },
-  { key: 'pull', label: 'Pull' },
-  { key: 'legs', label: 'Legs' },
-  { key: 'rest', label: 'Rest' },
-];
-
 export function ConfigScreen() {
-  const { state, backToProfile, setCfgTab, setCfgDay, setDaySchedule, library, getPlan, toggleMirror, toggleInPlan, resetPlan } = useStore();
+  const { state, backToProfile, setCfgTab, library, getPlan, toggleInPlan, resetPlan } = useStore();
   const cfgTab = state.cfgTab;
-  const cfgDay = state.cfgDay;
-  const cfgMirror = !!state.mirror[cfgTab];
-  const isMirrored = cfgDay === 2 && cfgMirror;
-  const editSlot = (isMirrored ? `${cfgTab}1` : `${cfgTab}${cfgDay}`) as Slot;
   const plan = getPlan();
-  const cfgPlan = plan[editSlot];
+  const cfgPlan = plan[cfgTab];
 
   const byGroup = new Map<string, typeof library.push>();
   library[cfgTab].forEach((item) => {
@@ -45,44 +33,8 @@ export function ConfigScreen() {
         </div>
         <div style={{ flex: 1 }}>
           <div style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 800, fontSize: 20, color: 'var(--text)', lineHeight: 1 }}>Configure Workouts</div>
-          <div style={{ fontSize: 11.5, color: 'var(--muted)', fontWeight: 700, marginTop: 3 }}>Plan your week and pick moves for each day</div>
+          <div style={{ fontSize: 11.5, color: 'var(--muted)', fontWeight: 700, marginTop: 3 }}>Pick the moves for each workout mode</div>
         </div>
-      </div>
-
-      <div style={{ background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 15, padding: '13px 14px', display: 'flex', flexDirection: 'column', gap: 8, boxShadow: '0 6px 16px -14px var(--shadow)' }}>
-        <div style={{ marginBottom: 2 }}>
-          <div style={{ fontSize: 12.5, fontWeight: 800, color: 'var(--text)' }}>Weekly schedule</div>
-          <div style={{ fontSize: 10.5, color: 'var(--muted)', fontWeight: 700, marginTop: 2 }}>Choose what you train on each day of the week</div>
-        </div>
-        {weekDows.map(({ dow, label }) => (
-          <div key={dow} style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-            <span style={{ width: 32, fontSize: 11.5, fontWeight: 800, color: 'var(--muted)', flexShrink: 0 }}>{label}</span>
-            <div style={{ display: 'flex', gap: 5, flex: 1 }}>
-              {SCHEDULE_OPTIONS.map((opt) => {
-                const active = state.schedule[dow] === opt.key;
-                return (
-                  <div
-                    key={opt.key}
-                    onClick={() => setDaySchedule(dow, opt.key)}
-                    style={{
-                      flex: 1,
-                      textAlign: 'center',
-                      padding: '7px 0',
-                      borderRadius: 10,
-                      fontSize: 11.5,
-                      fontWeight: 800,
-                      cursor: 'pointer',
-                      background: active ? 'linear-gradient(135deg,var(--hero1),var(--hero2))' : 'var(--card2)',
-                      color: active ? '#fff' : 'var(--muted)',
-                    }}
-                  >
-                    {opt.label}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        ))}
       </div>
 
       <div style={{ display: 'flex', gap: 7 }}>
@@ -112,63 +64,16 @@ export function ConfigScreen() {
         })}
       </div>
 
-      <div style={{ display: 'flex', gap: 6, background: 'var(--card2)', borderRadius: 13, padding: 4 }}>
-        {[1, 2].map((d) => {
-          const active = cfgDay === d;
-          return (
-            <div
-              key={d}
-              onClick={() => setCfgDay(d as 1 | 2)}
-              style={{
-                flex: 1,
-                textAlign: 'center',
-                padding: '9px 0',
-                borderRadius: 10,
-                fontSize: 12.5,
-                fontWeight: 800,
-                cursor: 'pointer',
-                background: active ? 'var(--card)' : 'transparent',
-                boxShadow: active ? '0 2px 6px rgba(0,0,0,.12)' : 'none',
-                color: active ? 'var(--hero1)' : 'var(--muted)',
-              }}
-            >
-              Day {d}
-            </div>
-          );
-        })}
-      </div>
-
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 15, padding: '12px 14px' }}>
-        <div style={{ flex: 1, paddingRight: 10 }}>
-          <div style={{ fontSize: 12.5, fontWeight: 800, color: 'var(--text)' }}>Repeat Day 1 on Day 2</div>
-          <div style={{ fontSize: 10.5, color: 'var(--muted)', fontWeight: 700, marginTop: 2 }}>Off = give Day 2 its own exercises</div>
-        </div>
-        <div
-          onClick={() => toggleMirror(cfgTab)}
-          style={{ width: 46, height: 27, borderRadius: 14, background: cfgMirror ? 'linear-gradient(90deg,var(--hero1),var(--hero2))' : 'var(--line)', position: 'relative', cursor: 'pointer', flexShrink: 0, transition: 'background .15s' }}
-        >
-          <div style={{ width: 21, height: 21, borderRadius: '50%', background: '#fff', position: 'absolute', top: 3, left: cfgMirror ? 22 : 3, transition: 'left .15s', boxShadow: '0 1px 3px rgba(0,0,0,.3)' }} />
-        </div>
-      </div>
-
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 2px' }}>
         <span style={{ fontSize: 12, color: 'var(--muted)', fontWeight: 700 }}>
-          <b style={{ color: 'var(--hero1)', fontFamily: "'Baloo 2',sans-serif" }}>{cfgPlan.length}</b> of {library[cfgTab].length} · {cfgTab} · Day {cfgDay}
+          <b style={{ color: 'var(--hero1)', fontFamily: "'Baloo 2',sans-serif" }}>{cfgPlan.length}</b> of {library[cfgTab].length} · {cfgTab}
         </span>
         <span onClick={resetPlan} style={{ fontSize: 11.5, color: 'var(--muted)', fontWeight: 800, textDecoration: 'underline', cursor: 'pointer' }}>
           Reset
         </span>
       </div>
 
-      {isMirrored ? (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 9, background: 'var(--card2)', borderRadius: 14, padding: '13px 15px' }}>
-          <span style={{ fontSize: 16 }}>🔁</span>
-          <span style={{ fontSize: 12, color: 'var(--muted)', fontWeight: 700, lineHeight: 1.5 }}>
-            Day 2 mirrors your Day 1 plan. Turn off <b style={{ color: 'var(--text)' }}>Repeat</b> above to customise it separately.
-          </span>
-        </div>
-      ) : (
-        Array.from(byGroup.entries()).map(([group, items]) => (
+      {Array.from(byGroup.entries()).map(([group, items]) => (
           <div key={group}>
             <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.06em', margin: '8px 2px 8px' }}>
               {group} · {items.length}
@@ -179,7 +84,7 @@ export function ConfigScreen() {
                 return (
                   <div
                     key={item.id}
-                    onClick={() => toggleInPlan(editSlot, item.id)}
+                    onClick={() => toggleInPlan(cfgTab, item.id)}
                     style={{
                       display: 'flex',
                       alignItems: 'center',
@@ -217,8 +122,7 @@ export function ConfigScreen() {
               })}
             </div>
           </div>
-        ))
-      )}
+        ))}
     </div>
   );
 }

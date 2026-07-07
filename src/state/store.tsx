@@ -8,18 +8,10 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import type { DayType, ScheduleDay, SetLog, Slot, WeekSchedule } from '../data/types';
-import {
-  allSlots,
-  buildLibrary,
-  day2Default,
-  defaultSchedule,
-  deriveWeek,
-  slotBase,
-  slotDayNum,
-} from '../data/exercises';
+import type { DayType, ScheduleDay, SetLog } from '../data/types';
+import { allTypes, buildLibrary, nextType } from '../data/exercises';
 import { loadJSON, saveJSON } from './storage';
-import { defaultUser, type BodyweightEntry, type Screen, type Session, type UserProfile } from './types';
+import { defaultUser, type BodyweightEntry, type DaySelection, type Screen, type Session, type UserProfile } from './types';
 import { dispW as dispWUnits, wStep as wStepUnits } from '../lib/units';
 import { todayISO } from '../lib/date';
 import {
@@ -42,8 +34,8 @@ function usePersisted<T>(key: string, fallback: T) {
   return [value, setValue] as const;
 }
 
-function keyOf(slot: Slot, id: string) {
-  return `${slot}:${id}`;
+function keyOf(type: DayType, id: string) {
+  return `${type}:${id}`;
 }
 
 export function useWorkoutMeStore() {
@@ -52,14 +44,12 @@ export function useWorkoutMeStore() {
   const [onboarded, setOnboarded] = usePersisted<boolean>('onboarded', false);
   const [screen, setScreen] = useState<Screen>(onboarded ? 'today' : 'signin');
   const [theme, setThemeState] = usePersisted<'light' | 'dark'>('theme', 'light');
-  const [selDOW, setSelDOW] = useState<number>(new Date().getDay());
-  const [activeSlot, setActiveSlot] = useState<Slot | null>(null);
+  const [daySel, setDaySel] = usePersisted<DaySelection | null>('daySel', null);
+  const [activeType, setActiveType] = useState<DayType | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [plan, setPlan] = usePersisted<Partial<Record<Slot, string[]>>>('plan', {});
-  const [mirror, setMirror] = usePersisted<Partial<Record<DayType, boolean>>>('mirror', {});
-  const [scheduleOverrides, setScheduleOverrides] = usePersisted<Partial<WeekSchedule>>('schedule', {});
+  // Keyed loosely (string) so plans saved under the old per-slot keys ("push1") still load.
+  const [plan, setPlan] = usePersisted<Record<string, string[]>>('plan', {});
   const [cfgTab, setCfgTab] = useState<DayType>('push');
-  const [cfgDay, setCfgDay] = useState<1 | 2>(1);
   const [logs, setLogs] = usePersisted<Record<string, SetLog[]>>('logs', {});
   const [doneTime, setDoneTime] = usePersisted<Record<string, boolean>>('doneTime', {});
   const [signedIn, setSignedIn] = usePersisted<boolean>('signedIn', false);
@@ -83,89 +73,70 @@ export function useWorkoutMeStore() {
   const dispW = useCallback((kg: number) => dispWUnits(kg, units()), [units]);
   const wStep = useCallback(() => wStepUnits(units()), [units]);
 
-  const getMirror = useCallback(() => mirror, [mirror]);
+  // Suggested next workout type: the PPL step after the most recent logged session.
+  const suggestedType = useMemo<DayType>(() => {
+    if (!sessions.length) return 'push';
+    const last = sessions.reduce((a, b) => (b.date.localeCompare(a.date) >= 0 ? b : a));
+    return nextType(last.type);
+  }, [sessions]);
 
-  const schedule = useMemo<WeekSchedule>(() => ({ ...defaultSchedule, ...scheduleOverrides } as WeekSchedule), [scheduleOverrides]);
-  const week = useMemo(() => deriveWeek(schedule), [schedule]);
+  // Today's selection: what the user picked today, or the suggested default.
+  const day = useMemo<DaySelection>(() => {
+    const date = todayISO();
+    if (daySel && daySel.date === date) return daySel;
+    return { date, type: suggestedType };
+  }, [daySel, suggestedType]);
 
-  const setDaySchedule = useCallback(
-    (dow: number, type: ScheduleDay) => {
-      setScheduleOverrides((prev) => ({ ...prev, [dow]: type }));
+  const selectDayType = useCallback(
+    (type: ScheduleDay) => {
+      setDaySel({ date: todayISO(), type });
+      setActiveId(null);
     },
-    [setScheduleOverrides],
+    [setDaySel],
   );
 
-  const defaultSlotPlan = useCallback(
-    (slot: Slot): string[] => {
-      const base = slotBase(slot);
-      if (slotDayNum(slot) === 2) return (day2Default[base] || []).filter((id) => libById[id]);
-      return defaultPlan[base].slice();
-    },
-    [defaultPlan, libById],
-  );
-
-  const getPlan = useCallback((): Record<Slot, string[]> => {
-    const base = {} as Record<Slot, string[]>;
-    allSlots.forEach((s) => {
-      base[s] = defaultSlotPlan(s);
-    });
-    Object.keys(plan).forEach((s) => {
-      const slot = s as Slot;
-      const val = plan[slot];
-      if (base[slot] && Array.isArray(val)) base[slot] = val;
+  const getPlan = useCallback((): Record<DayType, string[]> => {
+    const base = {} as Record<DayType, string[]>;
+    allTypes.forEach((t) => {
+      // Fall back to the legacy per-slot key ("push1") so old saved plans carry over.
+      const stored = plan[t] ?? plan[`${t}1`];
+      base[t] = Array.isArray(stored) ? stored.filter((id) => libById[id]) : defaultPlan[t].slice();
+      if (!base[t].length) base[t] = defaultPlan[t].slice();
     });
     return base;
-  }, [plan, defaultSlotPlan]);
-
-  const effSlot = useCallback(
-    (slot: Slot): Slot => {
-      const base = slotBase(slot);
-      if (slotDayNum(slot) === 2 && getMirror()[base]) return `${base}1` as Slot;
-      return slot;
-    },
-    [getMirror],
-  );
+  }, [plan, defaultPlan, libById]);
 
   const planItems = useCallback(
-    (slot: Slot) => getPlan()[effSlot(slot)].map((id) => libById[id]).filter(Boolean),
-    [getPlan, effSlot, libById],
+    (type: DayType) => getPlan()[type].map((id) => libById[id]).filter(Boolean),
+    [getPlan, libById],
   );
 
-  const persistPlan = useCallback((p: Partial<Record<Slot, string[]>>) => setPlan(p), [setPlan]);
-  const persistMirror = useCallback((m: Partial<Record<DayType, boolean>>) => setMirror(m), [setMirror]);
-
-  const toggleMirror = useCallback(
-    (base: DayType) => {
-      persistMirror({ ...mirror, [base]: !mirror[base] });
-    },
-    [mirror, persistMirror],
-  );
+  const persistPlan = useCallback((p: Record<string, string[]>) => setPlan(p), [setPlan]);
 
   const toggleInPlan = useCallback(
-    (slot: Slot, id: string) => {
+    (type: DayType, id: string) => {
       const currentPlan = getPlan();
-      const list = currentPlan[slot].slice();
-      const base = slotBase(slot);
+      const list = currentPlan[type].slice();
       const at = list.indexOf(id);
       if (at >= 0) {
         if (list.length <= 1) return;
         list.splice(at, 1);
       } else {
-        const order = library[base].map((x) => x.id);
+        const order = library[type].map((x) => x.id);
         list.push(id);
         list.sort((a, b) => order.indexOf(a) - order.indexOf(b));
       }
-      persistPlan({ ...currentPlan, [slot]: list });
+      persistPlan({ ...currentPlan, [type]: list });
     },
     [getPlan, library, persistPlan],
   );
 
   const swapInPlan = useCallback(
-    (slot: Slot, oldId: string, newId: string) => {
+    (type: DayType, oldId: string, newId: string) => {
       const currentPlan = getPlan();
-      const list = currentPlan[slot].map((id) => (id === oldId ? newId : id));
-      persistPlan({ ...currentPlan, [slot]: list });
-      const ko = keyOf(slot, oldId);
+      const list = currentPlan[type].map((id) => (id === oldId ? newId : id));
+      persistPlan({ ...currentPlan, [type]: list });
+      const ko = keyOf(type, oldId);
       setLogs((prev) => {
         const next = { ...prev };
         delete next[ko];
@@ -182,18 +153,18 @@ export function useWorkoutMeStore() {
   );
 
   const resetPlan = useCallback(() => {
-    const p: Partial<Record<Slot, string[]>> = {};
-    allSlots.forEach((s) => {
-      p[s] = defaultSlotPlan(s);
+    const p: Record<string, string[]> = {};
+    allTypes.forEach((t) => {
+      p[t] = defaultPlan[t].slice();
     });
     persistPlan(p);
-  }, [defaultSlotPlan, persistPlan]);
+  }, [defaultPlan, persistPlan]);
 
   const getSets = useCallback(
-    (slot: Slot, id: string): SetLog[] | null => {
+    (type: DayType, id: string): SetLog[] | null => {
       const ex = libById[id];
       if (!ex || ex.time) return null;
-      const k = keyOf(slot, id);
+      const k = keyOf(type, id);
       if (logs[k]) return logs[k];
       return Array.from({ length: ex.sets }, () => ({ w: ex.last, r: ex.reps, done: false }));
     },
@@ -201,26 +172,26 @@ export function useWorkoutMeStore() {
   );
 
   const writeSets = useCallback(
-    (slot: Slot, id: string, arr: SetLog[]) => {
-      setLogs((prev) => ({ ...prev, [keyOf(slot, id)]: arr }));
+    (type: DayType, id: string, arr: SetLog[]) => {
+      setLogs((prev) => ({ ...prev, [keyOf(type, id)]: arr }));
     },
     [setLogs],
   );
 
   const adjW = useCallback(
-    (slot: Slot, id: string, si: number, d: number) => {
-      const arr = (getSets(slot, id) ?? []).map((x) => ({ ...x }));
+    (type: DayType, id: string, si: number, d: number) => {
+      const arr = (getSets(type, id) ?? []).map((x) => ({ ...x }));
       arr[si].w = Math.max(0, Math.round((arr[si].w + d) * 2) / 2);
-      writeSets(slot, id, arr);
+      writeSets(type, id, arr);
     },
     [getSets, writeSets],
   );
 
   const adjR = useCallback(
-    (slot: Slot, id: string, si: number, d: number) => {
-      const arr = (getSets(slot, id) ?? []).map((x) => ({ ...x }));
+    (type: DayType, id: string, si: number, d: number) => {
+      const arr = (getSets(type, id) ?? []).map((x) => ({ ...x }));
       arr[si].r = Math.max(0, arr[si].r + d);
-      writeSets(slot, id, arr);
+      writeSets(type, id, arr);
     },
     [getSets, writeSets],
   );
@@ -241,29 +212,29 @@ export function useWorkoutMeStore() {
   }, []);
 
   const toggleSet = useCallback(
-    (slot: Slot, id: string, si: number) => {
-      const arr = (getSets(slot, id) ?? []).map((x) => ({ ...x }));
+    (type: DayType, id: string, si: number) => {
+      const arr = (getSets(type, id) ?? []).map((x) => ({ ...x }));
       arr[si].done = !arr[si].done;
-      writeSets(slot, id, arr);
+      writeSets(type, id, arr);
       if (arr[si].done) startRest(90);
     },
     [getSets, writeSets, startRest],
   );
 
   const toggleTime = useCallback(
-    (slot: Slot, id: string) => {
-      const k = keyOf(slot, id);
+    (type: DayType, id: string) => {
+      const k = keyOf(type, id);
       setDoneTime((prev) => ({ ...prev, [k]: !prev[k] }));
     },
     [setDoneTime],
   );
 
   const isExDone = useCallback(
-    (slot: Slot, id: string): boolean => {
+    (type: DayType, id: string): boolean => {
       const ex = libById[id];
       if (!ex) return false;
-      if (ex.time) return !!doneTime[keyOf(slot, id)];
-      const sets = getSets(slot, id);
+      if (ex.time) return !!doneTime[keyOf(type, id)];
+      const sets = getSets(type, id);
       return sets ? sets.every((x) => x.done) : false;
     },
     [libById, doneTime, getSets],
@@ -286,13 +257,8 @@ export function useWorkoutMeStore() {
   );
 
   const go = useCallback((s: Screen) => setScreen(s), []);
-  const selectDOW = useCallback((dow: number) => {
-    setSelDOW(dow);
-    setScreen('today');
-    setActiveId(null);
-  }, []);
-  const openEx = useCallback((slot: Slot, id: string) => {
-    setActiveSlot(slot);
+  const openEx = useCallback((type: DayType, id: string) => {
+    setActiveType(type);
     setActiveId(id);
     setScreen('exercise');
   }, []);
@@ -341,13 +307,13 @@ export function useWorkoutMeStore() {
   );
 
   const finishWorkout = useCallback(
-    (slot: Slot) => {
-      const items = planItems(slot);
+    (type: DayType) => {
+      const items = planItems(type);
       const date = todayISO();
       const sessionItems = items
         .map((ex) => {
           if (ex.time) return null;
-          const sets = getSets(slot, ex.id) ?? [];
+          const sets = getSets(type, ex.id) ?? [];
           const doneSets = sets.filter((s) => s.done);
           if (!doneSets.length) return null;
           return {
@@ -363,23 +329,22 @@ export function useWorkoutMeStore() {
       if (!sessionItems.length) return;
 
       const session: Session = {
-        id: `${date}-${slot}-${Date.now()}`,
+        id: `${date}-${type}-${Date.now()}`,
         date,
-        dow: selDOW,
-        slot,
-        type: slotBase(slot),
+        dow: new Date().getDay(),
+        type,
         items: sessionItems,
         totalVolume: sessionItems.reduce((sum, i) => sum + i.volume, 0),
       };
       setSessions((prev) => {
-        const already = prev.some((s) => s.date === date && s.slot === slot);
+        const already = prev.some((s) => s.date === date && s.type === type);
         if (already) {
-          return prev.map((s) => (s.date === date && s.slot === slot ? session : s));
+          return prev.map((s) => (s.date === date && s.type === type ? session : s));
         }
         return [...prev, session];
       });
     },
-    [planItems, getSets, selDOW, setSessions],
+    [planItems, getSets, setSessions],
   );
 
   // --- Google sync ---
@@ -403,12 +368,6 @@ export function useWorkoutMeStore() {
       if (Object.keys(remote.plan).length && Object.keys(plan).length === 0) {
         setPlan(remote.plan);
       }
-      if (Object.keys(remote.mirror).length && Object.keys(mirror).length === 0) {
-        setMirror(remote.mirror);
-      }
-      if (Object.keys(remote.schedule).length && Object.keys(scheduleOverrides).length === 0) {
-        setScheduleOverrides(remote.schedule);
-      }
       if (remote.sessions.length) {
         setSessions((prev) => {
           const byId = new Map(prev.map((s) => [s.id, s]));
@@ -428,7 +387,7 @@ export function useWorkoutMeStore() {
         });
       }
     },
-    [plan, mirror, scheduleOverrides, setUser, setPlan, setMirror, setScheduleOverrides, setSessions, setBodyweight],
+    [plan, setUser, setPlan, setSessions, setBodyweight],
   );
 
   const runSync = useCallback(
@@ -442,8 +401,6 @@ export function useWorkoutMeStore() {
           user: user ?? defaultUser,
           theme,
           plan,
-          mirror,
-          schedule: scheduleOverrides,
           sessions,
           bodyweight,
         });
@@ -454,7 +411,7 @@ export function useWorkoutMeStore() {
         setSyncError(err instanceof Error ? err.message : 'Sync failed');
       }
     },
-    [applyRemoteMerge, user, theme, plan, mirror, scheduleOverrides, sessions, bodyweight, setLastSyncedAt],
+    [applyRemoteMerge, user, theme, plan, sessions, bodyweight, setLastSyncedAt],
   );
 
   const signIn = useCallback(async () => {
@@ -508,13 +465,10 @@ export function useWorkoutMeStore() {
     state: {
       screen,
       theme,
-      selDOW,
-      activeSlot,
+      day,
+      activeType,
       activeId,
       cfgTab,
-      cfgDay,
-      mirror,
-      schedule,
       logs,
       doneTime,
       signedIn,
@@ -533,14 +487,12 @@ export function useWorkoutMeStore() {
     units,
     dispW,
     wStep,
-    week,
-    setDaySchedule,
+    suggestedType,
+    selectDayType,
     getPlan,
-    effSlot,
     planItems,
     getSets,
     isExDone,
-    toggleMirror,
     toggleInPlan,
     swapInPlan,
     resetPlan,
@@ -552,13 +504,11 @@ export function useWorkoutMeStore() {
     addRest,
     skipRest,
     go,
-    selectDOW,
     openEx,
     back,
     openConfig,
     backToProfile,
     setCfgTab,
-    setCfgDay,
     setTheme,
     openSetup,
     closeSetup,

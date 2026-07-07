@@ -1,31 +1,25 @@
-import { slotDayNum, typeName, typeSub } from '../data/exercises';
+import type { ScheduleDay } from '../data/types';
+import { typeName, typeSub } from '../data/exercises';
 import { assetUrl } from '../lib/assetPath';
 import { useStore } from '../state/store';
 
+const MODES: { key: ScheduleDay; label: string; icon: string }[] = [
+  { key: 'push', label: 'Push', icon: '🏋️' },
+  { key: 'pull', label: 'Pull', icon: '💪' },
+  { key: 'legs', label: 'Legs', icon: '🦵' },
+  { key: 'rest', label: 'Rest', icon: '🛌' },
+];
+
 export function TodayScreen() {
-  const { state, week, getUser, selectDOW, openEx, go, planItems, isExDone, dispW, units, finishWorkout, openSetup } = useStore();
-  const selDOW = state.selDOW;
+  const { state, suggestedType, getUser, selectDayType, openEx, go, planItems, isExDone, dispW, units, finishWorkout, openSetup } = useStore();
   const gym = getUser().gym;
-  const dayType = week.typeByDow[selDOW] ?? 'rest';
+  const dayType = state.day.type;
   const isRest = dayType === 'rest';
-  const curSlot = isRest ? null : week.slotByDow[selDOW] ?? null;
-  const dayNum = curSlot ? slotDayNum(curSlot) : 1;
+  const curType = isRest ? null : dayType;
 
-  // Next non-rest day after the selected one, for the rest-day card.
-  let nextWorkout: { name: string; label: string } | null = null;
-  for (let i = 1; i <= 7; i++) {
-    const dow = (selDOW + i) % 7;
-    const t = week.typeByDow[dow];
-    if (t && t !== 'rest') {
-      const label = i === 1 ? 'tomorrow' : `on ${week.labels.find((l) => l.dow === dow)?.label}`;
-      nextWorkout = { name: typeName[t], label };
-      break;
-    }
-  }
-
-  const items = curSlot ? planItems(curSlot) : [];
+  const items = curType ? planItems(curType) : [];
   const itemViews = items.map((ex) => {
-    const done = curSlot ? isExDone(curSlot, ex.id) : false;
+    const done = curType ? isExDone(curType, ex.id) : false;
     const setsReps = ex.time ? `${ex.dur} min` : `${ex.sets} × ${ex.reps}`;
     const meta = ex.time ? 'Incline walk · finisher' : `${ex.muscle} · Last ${dispW(ex.last)} ${units()}`;
     return { ex, done, setsReps, meta };
@@ -35,14 +29,14 @@ export function TodayScreen() {
   const ctaText = doneCount === 0 ? 'Start Workout' : doneCount >= total ? 'Finish & Save ✓' : 'Continue Workout';
 
   const startFirst = () => {
-    if (!curSlot) return;
+    if (!curType) return;
     if (doneCount >= total && total > 0) {
-      finishWorkout(curSlot);
+      finishWorkout(curType);
       go('progress');
       return;
     }
     const next = itemViews.find((i) => !i.done);
-    if (next) openEx(curSlot, next.ex.id);
+    if (next) openEx(curType, next.ex.id);
   };
 
   const heroC = 'var(--hero1)';
@@ -77,15 +71,8 @@ export function TodayScreen() {
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 12, position: 'relative' }}>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 800, fontSize: 29, color: '#fff', lineHeight: 1 }}>
-                {typeName[dayType]}
-              </div>
-              {!isRest && (
-                <span style={{ background: 'rgba(255,255,255,.22)', color: '#fff', fontSize: 10, fontWeight: 800, padding: '4px 9px', borderRadius: 9, letterSpacing: '.02em', whiteSpace: 'nowrap' }}>
-                  Day {dayNum}
-                </span>
-              )}
+            <div style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 800, fontSize: 29, color: '#fff', lineHeight: 1 }}>
+              {typeName[dayType]}
             </div>
             <div style={{ fontSize: 12.5, color: 'rgba(255,255,255,.88)', fontWeight: 700, marginTop: 5 }}>
               {typeSub[dayType]}
@@ -100,12 +87,12 @@ export function TodayScreen() {
       </div>
 
       <div style={{ display: 'flex', gap: 6 }}>
-        {week.labels.map((r) => {
-          const active = r.dow === selDOW;
+        {MODES.map((m) => {
+          const active = m.key === dayType;
           return (
             <div
-              key={r.dow}
-              onClick={() => selectDOW(r.dow)}
+              key={m.key}
+              onClick={() => selectDayType(m.key)}
               style={
                 active
                   ? {
@@ -123,8 +110,8 @@ export function TodayScreen() {
                   : { flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, padding: '9px 0 7px', borderRadius: 14, background: 'var(--card)', cursor: 'pointer', border: '1px solid var(--line)' }
               }
             >
-              <span style={{ fontSize: 9, fontWeight: 800, color: active ? 'rgba(255,255,255,.8)' : mutedC }}>{r.label}</span>
-              <span style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 800, fontSize: 14, color: active ? '#fff' : r.letter === 'R' ? mutedC : heroC }}>{r.letter}</span>
+              <span style={{ fontSize: 15, lineHeight: 1 }}>{m.icon}</span>
+              <span style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 800, fontSize: 13, color: active ? '#fff' : m.key === 'rest' ? mutedC : heroC }}>{m.label}</span>
             </div>
           );
         })}
@@ -136,11 +123,7 @@ export function TodayScreen() {
           <div style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 800, fontSize: 21, color: 'var(--text)', marginTop: 6 }}>Rest & Recover</div>
           <div style={{ fontSize: 13, color: 'var(--muted)', fontWeight: 600, lineHeight: 1.6, marginTop: 8 }}>
             Muscle grows on rest days. Keep protein up, hydrate, and get 7–8 h sleep.
-            {nextWorkout && (
-              <>
-                {' '}Next up: <b style={{ color: 'var(--text)' }}>{nextWorkout.name}</b> {nextWorkout.label}.
-              </>
-            )}
+            {' '}Next up: <b style={{ color: 'var(--text)' }}>{typeName[suggestedType]}</b> when you&apos;re back.
           </div>
           <button
             onClick={openSetup}
@@ -154,7 +137,7 @@ export function TodayScreen() {
           {itemViews.map(({ ex, done, setsReps, meta }) => (
             <div
               key={ex.id}
-              onClick={() => curSlot && openEx(curSlot, ex.id)}
+              onClick={() => curType && openEx(curType, ex.id)}
               style={{ background: 'var(--card)', borderRadius: 18, overflow: 'hidden', boxShadow: '0 8px 20px -14px var(--shadow)', border: '1px solid var(--line)', cursor: 'pointer' }}
             >
               <div style={{ position: 'relative', height: 118 }}>
