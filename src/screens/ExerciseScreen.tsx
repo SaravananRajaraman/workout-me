@@ -2,7 +2,7 @@ import { assetUrl } from '../lib/assetPath';
 import { useStore } from '../state/store';
 
 export function ExerciseScreen() {
-  const { state, libById, back, getPlan, library, swapInPlan, openEx, getSets, toggleTime, toggleSet, adjW, adjR, startRest, dispW, units, isExDone, wStep } = useStore();
+  const { state, libById, back, getPlan, library, swapInPlan, openEx, getSets, toggleTime, toggleSet, adjW, adjR, startRest, isExDone } = useStore();
   const activeId = state.activeId;
   const activeType = state.activeType;
   if (!activeId || !activeType || !libById[activeId]) return null;
@@ -92,10 +92,8 @@ export function ExerciseScreen() {
             exId={ex.id}
             targetReps={ex.reps}
             sets={getSets(activeType, ex.id) ?? []}
-            dispW={dispW}
-            units={units()}
             onToggle={(si) => toggleSet(activeType, ex.id, si)}
-            onAdjW={(si, d) => adjW(activeType, ex.id, si, d * wStep())}
+            onAdjW={(si, d) => adjW(activeType, ex.id, si, d * 2.5)}
             onAdjR={(si, d) => adjR(activeType, ex.id, si, d)}
             onRest={() => startRest(90)}
           />
@@ -135,8 +133,6 @@ function TimeBlock({ dur, isDone, onToggle }: { exId: string; dur: number; isDon
 function SetsBlock({
   targetReps,
   sets,
-  dispW,
-  units,
   onToggle,
   onAdjW,
   onAdjR,
@@ -145,8 +141,6 @@ function SetsBlock({
   exId: string;
   targetReps: number;
   sets: { w: number; r: number; done: boolean }[];
-  dispW: (kg: number) => number;
-  units: string;
   onToggle: (si: number) => void;
   onAdjW: (si: number, d: number) => void;
   onAdjR: (si: number, d: number) => void;
@@ -187,7 +181,7 @@ function SetsBlock({
             </div>
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
-            <Stepper label="Weight" value={`${dispW(s.w)} ${units}`} onMinus={() => onAdjW(si, -1)} onPlus={() => onAdjW(si, 1)} />
+            <Stepper label="Weight" value={`${s.w} kg`} onMinus={() => onAdjW(si, -1)} onPlus={() => onAdjW(si, 1)} />
             <Stepper label="Reps" value={String(s.r)} onMinus={() => onAdjR(si, -1)} onPlus={() => onAdjR(si, 1)} />
           </div>
         </div>

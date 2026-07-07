@@ -3,9 +3,8 @@ import { useStore } from '../state/store';
 import { heightForDisplay } from '../lib/units';
 
 export function ProfileScreen() {
-  const { getUser, dispW, units, openSetup, openConfig, go, setTheme, state, library, signOut } = useStore();
+  const { getUser, openSetup, openConfig, go, setTheme, state, library, signOut } = useStore();
   const user = getUser();
-  const u = units();
   const isDark = state.theme === 'dark';
   const bmiVal = user.weightKg / Math.pow(user.heightCm / 100, 2);
   const bmiCat = bmiVal < 18.5 ? 'low' : bmiVal < 25 ? 'healthy' : bmiVal < 30 ? 'high' : 'obese';
@@ -71,9 +70,9 @@ export function ProfileScreen() {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-        <StatTile label="Height" value={heightForDisplay(user.heightCm, u)} />
-        <StatTile label="Weight" value={`${dispW(user.weightKg)} ${u}`} />
-        <StatTile label="Target" value={`${dispW(user.targetKg)} ${u}`} />
+        <StatTile label="Height" value={heightForDisplay(user.heightCm, user.heightUnit)} />
+        <StatTile label="Weight" value={`${user.weightKg} kg`} />
+        <StatTile label="Target" value={`${user.targetKg} kg`} />
         <StatTile label="BMI" value={bmiVal.toFixed(1)} suffix={bmiCat} />
       </div>
 
@@ -116,9 +115,9 @@ export function ProfileScreen() {
           </div>
         </div>
         <div onClick={openSetup} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 0', borderBottom: '1px solid var(--line)', cursor: 'pointer' }}>
-          <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--text)' }}>Units</span>
+          <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--text)' }}>Height unit</span>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--muted)' }}>{u === 'lb' ? 'Pounds (lb)' : 'Kilograms (kg)'}</span>
+            <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--muted)' }}>{user.heightUnit === 'ft' ? 'Feet & inches' : 'Centimeters (cm)'}</span>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" strokeWidth={2.4} strokeLinecap="round">
               <polyline points="9 6 15 12 9 18" />
             </svg>

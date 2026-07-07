@@ -1,5 +1,5 @@
 import type { DayType, ScheduleDay, SetLog } from '../data/types';
-import type { Units } from '../lib/units';
+import type { HeightUnit } from '../lib/units';
 
 export type Screen = 'signin' | 'today' | 'exercise' | 'progress' | 'profile' | 'config' | 'sync';
 
@@ -7,10 +7,10 @@ export interface UserProfile {
   name: string;
   gym: string;
   heightCm: number;
+  heightUnit: HeightUnit;
   weightKg: number;
   targetKg: number;
   goal: string;
-  units: Units;
 }
 
 export interface RestState {
@@ -87,8 +87,8 @@ export const defaultUser: UserProfile = {
   name: 'You',
   gym: 'My Gym',
   heightCm: 175,
+  heightUnit: 'cm',
   weightKg: 75,
   targetKg: 70,
   goal: 'Fat loss + muscle',
-  units: 'kg',
 };

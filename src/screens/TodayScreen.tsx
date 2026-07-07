@@ -11,7 +11,7 @@ const MODES: { key: ScheduleDay; label: string; icon: string }[] = [
 ];
 
 export function TodayScreen() {
-  const { state, suggestedType, getUser, selectDayType, openEx, go, planItems, isExDone, dispW, units, finishWorkout, openSetup } = useStore();
+  const { state, suggestedType, getUser, selectDayType, openEx, go, planItems, isExDone, finishWorkout, openSetup } = useStore();
   const gym = getUser().gym;
   const dayType = state.day.type;
   const isRest = dayType === 'rest';
@@ -21,7 +21,7 @@ export function TodayScreen() {
   const itemViews = items.map((ex) => {
     const done = curType ? isExDone(curType, ex.id) : false;
     const setsReps = ex.time ? `${ex.dur} min` : `${ex.sets} × ${ex.reps}`;
-    const meta = ex.time ? 'Incline walk · finisher' : `${ex.muscle} · Last ${dispW(ex.last)} ${units()}`;
+    const meta = ex.time ? 'Incline walk · finisher' : `${ex.muscle} · Last ${ex.last} kg`;
     return { ex, done, setsReps, meta };
   });
   const doneCount = itemViews.filter((i) => i.done).length;

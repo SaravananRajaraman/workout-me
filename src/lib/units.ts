@@ -1,18 +1,18 @@
-export type Units = 'kg' | 'lb';
+export type HeightUnit = 'cm' | 'ft';
 
-export function dispW(kg: number, units: Units): number {
-  return units === 'lb' ? Math.round(kg * 2.20462 * 2) / 2 : kg;
-}
-
-export function wStep(units: Units): number {
-  return units === 'lb' ? 5 : 2.5;
-}
-
-export function heightForDisplay(heightCm: number, units: Units): string {
-  if (units === 'lb') {
-    const ft = Math.floor(heightCm / 30.48);
-    const inch = Math.round(heightCm / 2.54 - ft * 12);
+export function heightForDisplay(heightCm: number, unit: HeightUnit): string {
+  if (unit === 'ft') {
+    const { ft, inch } = cmToFeetInches(heightCm);
     return `${ft}'${inch}"`;
   }
   return `${heightCm} cm`;
+}
+
+export function cmToFeetInches(heightCm: number): { ft: number; inch: number } {
+  const totalInches = Math.round(heightCm / 2.54);
+  return { ft: Math.floor(totalInches / 12), inch: totalInches % 12 };
+}
+
+export function feetInchesToCm(ft: number, inch: number): number {
+  return Math.round((ft * 12 + inch) * 2.54);
 }

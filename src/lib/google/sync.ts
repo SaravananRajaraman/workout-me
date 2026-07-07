@@ -48,7 +48,7 @@ export async function pushAll(
     ['weightKg', String(u?.weightKg ?? '')],
     ['targetKg', String(u?.targetKg ?? '')],
     ['goal', u?.goal ?? ''],
-    ['units', u?.units ?? 'kg'],
+    ['heightUnit', u?.heightUnit ?? 'cm'],
     ['theme', data.theme],
   ];
   const planRows = [

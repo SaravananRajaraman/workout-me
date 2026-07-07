@@ -1,6 +1,11 @@
 import { useStore } from '../state/store';
+import { heightForDisplay, type HeightUnit } from '../lib/units';
 
 const GOALS = ['Fat loss + muscle', 'Fat loss', 'Muscle gain', 'Maintain'];
+
+function heightStep(unit: HeightUnit): number {
+  return unit === 'ft' ? 2.54 : 1;
+}
 
 export function SetupSheet() {
   const { state, setDraft, saveSetup, closeSetup } = useStore();
@@ -35,7 +40,12 @@ export function SetupSheet() {
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 11 }}>
-          <Row label="Height" value={`${draft.heightCm} cm`} onMinus={() => setDraft({ heightCm: Math.max(120, draft.heightCm - 1) })} onPlus={() => setDraft({ heightCm: Math.min(230, draft.heightCm + 1) })} />
+          <Row
+            label="Height"
+            value={heightForDisplay(draft.heightCm, draft.heightUnit)}
+            onMinus={() => setDraft({ heightCm: Math.max(120, Math.round(draft.heightCm - heightStep(draft.heightUnit))) })}
+            onPlus={() => setDraft({ heightCm: Math.min(230, Math.round(draft.heightCm + heightStep(draft.heightUnit))) })}
+          />
           <Row
             label="Current weight"
             value={`${draft.weightKg} kg`}
@@ -48,6 +58,33 @@ export function SetupSheet() {
             onMinus={() => setDraft({ targetKg: Math.max(30, Math.round((draft.targetKg - 0.5) * 2) / 2) })}
             onPlus={() => setDraft({ targetKg: Math.min(250, Math.round((draft.targetKg + 0.5) * 2) / 2) })}
           />
+        </div>
+
+        <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.05em', margin: '16px 0 8px' }}>Height unit</div>
+        <div style={{ display: 'flex', gap: 6, background: 'var(--card2)', borderRadius: 14, padding: 4 }}>
+          {(['cm', 'ft'] as const).map((v) => {
+            const active = draft.heightUnit === v;
+            return (
+              <div
+                key={v}
+                onClick={() => setDraft({ heightUnit: v })}
+                style={{
+                  flex: 1,
+                  textAlign: 'center',
+                  padding: '10px 0',
+                  borderRadius: 11,
+                  fontSize: 12.5,
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  background: active ? 'var(--card)' : 'transparent',
+                  boxShadow: active ? '0 2px 6px rgba(0,0,0,.14)' : 'none',
+                  color: active ? 'var(--hero1)' : 'var(--muted)',
+                }}
+              >
+                {v === 'cm' ? 'Centimeters' : 'Feet & inches'}
+              </div>
+            );
+          })}
         </div>
 
         <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.05em', margin: '16px 0 8px' }}>Goal</div>
@@ -70,33 +107,6 @@ export function SetupSheet() {
                 }}
               >
                 {g}
-              </div>
-            );
-          })}
-        </div>
-
-        <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.05em', margin: '16px 0 8px' }}>Preferred units</div>
-        <div style={{ display: 'flex', gap: 6, background: 'var(--card2)', borderRadius: 14, padding: 4 }}>
-          {(['kg', 'lb'] as const).map((v) => {
-            const active = draft.units === v;
-            return (
-              <div
-                key={v}
-                onClick={() => setDraft({ units: v })}
-                style={{
-                  flex: 1,
-                  textAlign: 'center',
-                  padding: '10px 0',
-                  borderRadius: 11,
-                  fontSize: 12.5,
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  background: active ? 'var(--card)' : 'transparent',
-                  boxShadow: active ? '0 2px 6px rgba(0,0,0,.14)' : 'none',
-                  color: active ? 'var(--hero1)' : 'var(--muted)',
-                }}
-              >
-                {v === 'kg' ? 'Kilograms' : 'Pounds'}
               </div>
             );
           })}

@@ -3,10 +3,9 @@ import { useStore } from '../state/store';
 import { computeProgress } from '../lib/analytics';
 
 export function ProgressScreen() {
-  const { state, getUser, dispW, units } = useStore();
+  const { state, getUser } = useStore();
   const stats = useMemo(() => computeProgress(state.sessions, state.bodyweight), [state.sessions, state.bodyweight]);
   const user = getUser();
-  const u = units();
 
   const bw = stats.bodyweightSeries;
   const hasBw = bw.length >= 2;
@@ -42,12 +41,12 @@ export function ProgressScreen() {
             <div style={{ fontSize: 11.5, color: 'var(--muted)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em' }}>Body weight</div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 7, marginTop: 3 }}>
               <span style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 800, fontSize: 28, color: 'var(--text)' }}>
-                {dispW(bwCurrent)} {u}
+                {bwCurrent} kg
               </span>
               {bw.length > 1 && (
                 <span style={{ fontSize: 12, fontWeight: 800, color: bwDeltaKg <= 0 ? 'var(--good)' : 'var(--hero1)' }}>
                   {bwDeltaKg > 0 ? '+' : bwDeltaKg < 0 ? '−' : ''}
-                  {Math.abs(dispW(bwDeltaKg))} {u}
+                  {Math.abs(bwDeltaKg)} kg
                 </span>
               )}
             </div>
@@ -55,7 +54,7 @@ export function ProgressScreen() {
           <div style={{ textAlign: 'right' }}>
             <div style={{ fontSize: 10.5, color: 'var(--muted)', fontWeight: 700 }}>Goal</div>
             <div style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 800, fontSize: 16, color: 'var(--text)' }}>
-              {dispW(user.targetKg)} {u}
+              {user.targetKg} kg
             </div>
           </div>
         </div>
@@ -122,7 +121,7 @@ export function ProgressScreen() {
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, color: 'var(--muted)', fontWeight: 700, marginTop: 6 }}>
           <span>8 wks ago</span>
           <span>
-            This week · {dispW(stats.weeklyVolume[stats.weeklyVolume.length - 1]?.total ?? 0)} {u}
+            This week · {stats.weeklyVolume[stats.weeklyVolume.length - 1]?.total ?? 0} kg
           </span>
         </div>
       </div>
@@ -134,7 +133,7 @@ export function ProgressScreen() {
             <span style={{ fontSize: 13.5, fontWeight: 800, color: 'var(--text)' }}>{p.name}</span>
             <div style={{ textAlign: 'right' }}>
               <span style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 14, color: 'var(--text)' }}>
-                {p.kg > 0 ? `${dispW(p.kg)} ${u}` : '—'}
+                {p.kg > 0 ? `${p.kg} kg` : '—'}
               </span>
               <div style={{ fontSize: 10, color: 'var(--good)', fontWeight: 800 }}>{p.setDate ? `Set ${p.setDate}` : 'Not logged yet'}</div>
             </div>

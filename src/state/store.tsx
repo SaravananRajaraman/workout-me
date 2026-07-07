@@ -12,7 +12,6 @@ import type { DayType, ScheduleDay, SetLog } from '../data/types';
 import { allTypes, buildLibrary, nextType } from '../data/exercises';
 import { loadJSON, saveJSON } from './storage';
 import { defaultUser, type BodyweightEntry, type DaySelection, type Screen, type Session, type UserProfile } from './types';
-import { dispW as dispWUnits, wStep as wStepUnits } from '../lib/units';
 import { todayISO } from '../lib/date';
 import {
   ensureSpreadsheet,
@@ -69,9 +68,6 @@ export function useWorkoutMeStore() {
   const restTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const getUser = useCallback((): UserProfile => user ?? defaultUser, [user]);
-  const units = useCallback(() => getUser().units, [getUser]);
-  const dispW = useCallback((kg: number) => dispWUnits(kg, units()), [units]);
-  const wStep = useCallback(() => wStepUnits(units()), [units]);
 
   // Suggested next workout type: the PPL step after the most recent logged session.
   const suggestedType = useMemo<DayType>(() => {
@@ -358,10 +354,10 @@ export function useWorkoutMeStore() {
             name: m.name || defaultUser.name,
             gym: m.gym || defaultUser.gym,
             heightCm: Number(m.heightCm) || defaultUser.heightCm,
+            heightUnit: m.heightUnit === 'ft' ? 'ft' : 'cm',
             weightKg: Number(m.weightKg) || defaultUser.weightKg,
             targetKg: Number(m.targetKg) || defaultUser.targetKg,
             goal: m.goal || defaultUser.goal,
-            units: m.units === 'lb' ? 'lb' : 'kg',
           };
         });
       }
@@ -484,9 +480,6 @@ export function useWorkoutMeStore() {
       googleConfigured: isGoogleConfigured(),
     },
     getUser,
-    units,
-    dispW,
-    wStep,
     suggestedType,
     selectDayType,
     getPlan,
