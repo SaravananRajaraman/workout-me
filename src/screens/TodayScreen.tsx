@@ -1,14 +1,27 @@
-import { daySlotByDow, dayTypeByDow, dowLabels, slotDayNum, typeName, typeSub } from '../data/exercises';
+import { slotDayNum, typeName, typeSub } from '../data/exercises';
 import { assetUrl } from '../lib/assetPath';
 import { useStore } from '../state/store';
 
 export function TodayScreen() {
-  const { state, selectDOW, openEx, go, planItems, isExDone, dispW, units, finishWorkout, openSetup } = useStore();
+  const { state, week, getUser, selectDOW, openEx, go, planItems, isExDone, dispW, units, finishWorkout, openSetup } = useStore();
   const selDOW = state.selDOW;
-  const dayType = dayTypeByDow[selDOW];
+  const gym = getUser().gym;
+  const dayType = week.typeByDow[selDOW] ?? 'rest';
   const isRest = dayType === 'rest';
-  const curSlot = isRest ? null : daySlotByDow[selDOW];
+  const curSlot = isRest ? null : week.slotByDow[selDOW] ?? null;
   const dayNum = curSlot ? slotDayNum(curSlot) : 1;
+
+  // Next non-rest day after the selected one, for the rest-day card.
+  let nextWorkout: { name: string; label: string } | null = null;
+  for (let i = 1; i <= 7; i++) {
+    const dow = (selDOW + i) % 7;
+    const t = week.typeByDow[dow];
+    if (t && t !== 'rest') {
+      const label = i === 1 ? 'tomorrow' : `on ${week.labels.find((l) => l.dow === dow)?.label}`;
+      nextWorkout = { name: typeName[t], label };
+      break;
+    }
+  }
 
   const items = curSlot ? planItems(curSlot) : [];
   const itemViews = items.map((ex) => {
@@ -50,7 +63,7 @@ export function TodayScreen() {
         <div style={{ position: 'absolute', top: -30, right: -20, width: 120, height: 120, borderRadius: '50%', background: 'rgba(255,255,255,.09)' }} />
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative' }}>
           <span style={{ fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,.85)', letterSpacing: '.06em', textTransform: 'uppercase' }}>
-            Slam Fitness
+            {gym}
           </span>
           <div
             onClick={() => go('sync')}
@@ -76,7 +89,7 @@ export function TodayScreen() {
             </div>
             <div style={{ fontSize: 12.5, color: 'rgba(255,255,255,.88)', fontWeight: 700, marginTop: 5 }}>
               {typeSub[dayType]}
-              {!isRest ? ' · Slam Fitness' : ''}
+              {!isRest ? ` · ${gym}` : ''}
             </div>
           </div>
           <div style={{ textAlign: 'right' }}>
@@ -87,7 +100,7 @@ export function TodayScreen() {
       </div>
 
       <div style={{ display: 'flex', gap: 6 }}>
-        {dowLabels.map((r) => {
+        {week.labels.map((r) => {
           const active = r.dow === selDOW;
           return (
             <div
@@ -122,7 +135,12 @@ export function TodayScreen() {
           <div style={{ fontSize: 40 }}>🛌</div>
           <div style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 800, fontSize: 21, color: 'var(--text)', marginTop: 6 }}>Rest & Recover</div>
           <div style={{ fontSize: 13, color: 'var(--muted)', fontWeight: 600, lineHeight: 1.6, marginTop: 8 }}>
-            Muscle grows on rest days. Keep protein up, hydrate, and get 7–8 h sleep. Next up: <b style={{ color: 'var(--text)' }}>Push Day</b> tomorrow.
+            Muscle grows on rest days. Keep protein up, hydrate, and get 7–8 h sleep.
+            {nextWorkout && (
+              <>
+                {' '}Next up: <b style={{ color: 'var(--text)' }}>{nextWorkout.name}</b> {nextWorkout.label}.
+              </>
+            )}
           </div>
           <button
             onClick={openSetup}

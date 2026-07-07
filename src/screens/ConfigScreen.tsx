@@ -1,4 +1,5 @@
-import type { DayType, Slot } from '../data/types';
+import type { DayType, ScheduleDay, Slot } from '../data/types';
+import { weekDows } from '../data/exercises';
 import { assetUrl } from '../lib/assetPath';
 import { useStore } from '../state/store';
 
@@ -8,8 +9,15 @@ const TABS: { key: DayType; label: string }[] = [
   { key: 'legs', label: 'Legs' },
 ];
 
+const SCHEDULE_OPTIONS: { key: ScheduleDay; label: string }[] = [
+  { key: 'push', label: 'Push' },
+  { key: 'pull', label: 'Pull' },
+  { key: 'legs', label: 'Legs' },
+  { key: 'rest', label: 'Rest' },
+];
+
 export function ConfigScreen() {
-  const { state, backToProfile, setCfgTab, setCfgDay, library, getPlan, toggleMirror, toggleInPlan, resetPlan } = useStore();
+  const { state, backToProfile, setCfgTab, setCfgDay, setDaySchedule, library, getPlan, toggleMirror, toggleInPlan, resetPlan } = useStore();
   const cfgTab = state.cfgTab;
   const cfgDay = state.cfgDay;
   const cfgMirror = !!state.mirror[cfgTab];
@@ -37,8 +45,44 @@ export function ConfigScreen() {
         </div>
         <div style={{ flex: 1 }}>
           <div style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 800, fontSize: 20, color: 'var(--text)', lineHeight: 1 }}>Configure Workouts</div>
-          <div style={{ fontSize: 11.5, color: 'var(--muted)', fontWeight: 700, marginTop: 3 }}>Tap to add or remove moves for each day</div>
+          <div style={{ fontSize: 11.5, color: 'var(--muted)', fontWeight: 700, marginTop: 3 }}>Plan your week and pick moves for each day</div>
         </div>
+      </div>
+
+      <div style={{ background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 15, padding: '13px 14px', display: 'flex', flexDirection: 'column', gap: 8, boxShadow: '0 6px 16px -14px var(--shadow)' }}>
+        <div style={{ marginBottom: 2 }}>
+          <div style={{ fontSize: 12.5, fontWeight: 800, color: 'var(--text)' }}>Weekly schedule</div>
+          <div style={{ fontSize: 10.5, color: 'var(--muted)', fontWeight: 700, marginTop: 2 }}>Choose what you train on each day of the week</div>
+        </div>
+        {weekDows.map(({ dow, label }) => (
+          <div key={dow} style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+            <span style={{ width: 32, fontSize: 11.5, fontWeight: 800, color: 'var(--muted)', flexShrink: 0 }}>{label}</span>
+            <div style={{ display: 'flex', gap: 5, flex: 1 }}>
+              {SCHEDULE_OPTIONS.map((opt) => {
+                const active = state.schedule[dow] === opt.key;
+                return (
+                  <div
+                    key={opt.key}
+                    onClick={() => setDaySchedule(dow, opt.key)}
+                    style={{
+                      flex: 1,
+                      textAlign: 'center',
+                      padding: '7px 0',
+                      borderRadius: 10,
+                      fontSize: 11.5,
+                      fontWeight: 800,
+                      cursor: 'pointer',
+                      background: active ? 'linear-gradient(135deg,var(--hero1),var(--hero2))' : 'var(--card2)',
+                      color: active ? '#fff' : 'var(--muted)',
+                    }}
+                  >
+                    {opt.label}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </div>
 
       <div style={{ display: 'flex', gap: 7 }}>

@@ -1,8 +1,9 @@
-import { findOrCreateSpreadsheet, getValues, updateValues } from './api';
+import { createSpreadsheet, findSpreadsheet, getValues, renameFile, updateValues } from './api';
 import type { BodyweightEntry, Session, UserProfile } from '../../state/types';
-import type { DayType, Slot } from '../../data/types';
+import type { DayType, Slot, WeekSchedule } from '../../data/types';
 
-const FILE_TITLE = 'Slam PPL Data';
+const FILE_TITLE = 'Workout Me Data';
+const OLD_FILE_TITLE = 'Slam PPL Data';
 const TAB_TITLES = ['Profile', 'Plan', 'Sessions', 'Bodyweight'];
 
 const SESSION_HEADER = ['id', 'date', 'dow', 'slot', 'type', 'exerciseId', 'name', 'muscle', 'setIndex', 'weight', 'reps'];
@@ -12,12 +13,21 @@ export interface RemoteState {
   profileMap: Record<string, string>;
   plan: Partial<Record<Slot, string[]>>;
   mirror: Partial<Record<DayType, boolean>>;
+  schedule: Partial<WeekSchedule>;
   sessions: Session[];
   bodyweight: BodyweightEntry[];
 }
 
 export async function ensureSpreadsheet(accessToken: string): Promise<string> {
-  return findOrCreateSpreadsheet(accessToken, FILE_TITLE, TAB_TITLES);
+  const existing = await findSpreadsheet(accessToken, FILE_TITLE);
+  if (existing) return existing;
+  // Migrate a spreadsheet created under the app's previous name ("Slam PPL").
+  const legacy = await findSpreadsheet(accessToken, OLD_FILE_TITLE);
+  if (legacy) {
+    await renameFile(accessToken, legacy, FILE_TITLE);
+    return legacy;
+  }
+  return createSpreadsheet(accessToken, FILE_TITLE, TAB_TITLES);
 }
 
 export async function pushAll(
@@ -28,6 +38,7 @@ export async function pushAll(
     theme: string;
     plan: Partial<Record<Slot, string[]>>;
     mirror: Partial<Record<DayType, boolean>>;
+    schedule: Partial<WeekSchedule>;
     sessions: Session[];
     bodyweight: BodyweightEntry[];
   },
@@ -48,6 +59,7 @@ export async function pushAll(
     ['key', 'value'],
     ['plan_json', JSON.stringify(data.plan ?? {})],
     ['mirror_json', JSON.stringify(data.mirror ?? {})],
+    ['schedule_json', JSON.stringify(data.schedule ?? {})],
   ];
   const sessionRows: (string | number)[][] = [SESSION_HEADER];
   data.sessions.forEach((s) => {
@@ -62,7 +74,7 @@ export async function pushAll(
 
   await Promise.all([
     updateValues(accessToken, spreadsheetId, 'Profile!A1:B9', profileRows),
-    updateValues(accessToken, spreadsheetId, 'Plan!A1:B3', planRows),
+    updateValues(accessToken, spreadsheetId, 'Plan!A1:B4', planRows),
     updateValues(accessToken, spreadsheetId, `Sessions!A1:K${sessionRows.length + 1}`, sessionRows),
     updateValues(accessToken, spreadsheetId, `Bodyweight!A1:B${bwRows.length + 1}`, bwRows),
   ]);
@@ -71,7 +83,7 @@ export async function pushAll(
 export async function pullAll(accessToken: string, spreadsheetId: string): Promise<RemoteState> {
   const [profileRows, planRows, sessionRows, bwRows] = await Promise.all([
     getValues(accessToken, spreadsheetId, 'Profile!A1:B9'),
-    getValues(accessToken, spreadsheetId, 'Plan!A1:B3'),
+    getValues(accessToken, spreadsheetId, 'Plan!A1:B4'),
     getValues(accessToken, spreadsheetId, 'Sessions!A1:K200000'),
     getValues(accessToken, spreadsheetId, 'Bodyweight!A1:B20000'),
   ]);
@@ -83,6 +95,7 @@ export async function pullAll(accessToken: string, spreadsheetId: string): Promi
 
   let plan: Partial<Record<Slot, string[]>> = {};
   let mirror: Partial<Record<DayType, boolean>> = {};
+  let schedule: Partial<WeekSchedule> = {};
   planRows.slice(1).forEach(([k, v]) => {
     if (k === 'plan_json' && v) {
       try {
@@ -94,6 +107,13 @@ export async function pullAll(accessToken: string, spreadsheetId: string): Promi
     if (k === 'mirror_json' && v) {
       try {
         mirror = JSON.parse(v);
+      } catch {
+        /* ignore malformed remote data */
+      }
+    }
+    if (k === 'schedule_json' && v) {
+      try {
+        schedule = JSON.parse(v);
       } catch {
         /* ignore malformed remote data */
       }
@@ -144,6 +164,7 @@ export async function pullAll(accessToken: string, spreadsheetId: string): Promi
     profileMap,
     plan,
     mirror,
+    schedule,
     sessions: Array.from(sessionsById.values()),
     bodyweight,
   };

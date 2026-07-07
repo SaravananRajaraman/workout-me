@@ -1,6 +1,6 @@
-# Slam PPL
+# Workout Me
 
-A Push / Pull / Legs workout tracker PWA built in React + TypeScript + Vite, with optional Google Drive + Sheets sync.
+A Push / Pull / Legs workout tracker PWA built in React + TypeScript + Vite, with optional Google Drive + Sheets sync. You choose which activity (Push, Pull, Legs or Rest) happens on each day of the week.
 
 Implements the design in `gym-workout-tracker-pwa/project/Slam PPL App.dc.html` (a Claude Design handoff bundle) as a real, installable app.
 
@@ -28,7 +28,7 @@ The app works fully offline with local storage if you skip sign-in. To enable Go
    ```
 6. Restart `npm run dev`.
 
-Once connected, the app creates a "Slam PPL Data" spreadsheet in the signed-in user's Google Drive (visible only to your app, via the `drive.file` scope) with tabs for Profile, Plan, Sessions, and Bodyweight, and keeps it in sync with local data.
+Once connected, the app creates a "Workout Me Data" spreadsheet in the signed-in user's Google Drive (visible only to your app, via the `drive.file` scope) with tabs for Profile, Plan, Sessions, and Bodyweight, and keeps it in sync with local data. (A spreadsheet created by an older version under the name "Slam PPL Data" is automatically renamed and reused.)
 
 ## Deploying to GitHub Pages
 
@@ -45,7 +45,7 @@ The Vite `base` is already hardcoded to `/workout-me/` in `vite.config.ts` to ma
 
 ## Project structure
 
-- `src/data/` — exercise library and PPL program data, ported from the design's inline JS.
+- `src/data/` — exercise library and PPL program data, plus the default weekly schedule.
 - `src/state/store.tsx` — app state (screens, workout plan, logs, sessions, sync) as a single React context/hook.
 - `src/screens/` — one component per app screen (Today, Exercise, Progress, Profile, Config, Sync, Sign-in).
 - `src/lib/google/` — Google Identity Services auth + Drive/Sheets REST helpers.

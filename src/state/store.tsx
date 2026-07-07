@@ -8,11 +8,13 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import type { DayType, SetLog, Slot } from '../data/types';
+import type { DayType, ScheduleDay, SetLog, Slot, WeekSchedule } from '../data/types';
 import {
   allSlots,
   buildLibrary,
   day2Default,
+  defaultSchedule,
+  deriveWeek,
   slotBase,
   slotDayNum,
 } from '../data/exercises';
@@ -44,7 +46,7 @@ function keyOf(slot: Slot, id: string) {
   return `${slot}:${id}`;
 }
 
-export function useSlamPPLStore() {
+export function useWorkoutMeStore() {
   const { library, libById, defaultPlan } = useMemo(() => buildLibrary(), []);
 
   const [onboarded, setOnboarded] = usePersisted<boolean>('onboarded', false);
@@ -55,6 +57,7 @@ export function useSlamPPLStore() {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [plan, setPlan] = usePersisted<Partial<Record<Slot, string[]>>>('plan', {});
   const [mirror, setMirror] = usePersisted<Partial<Record<DayType, boolean>>>('mirror', {});
+  const [scheduleOverrides, setScheduleOverrides] = usePersisted<Partial<WeekSchedule>>('schedule', {});
   const [cfgTab, setCfgTab] = useState<DayType>('push');
   const [cfgDay, setCfgDay] = useState<1 | 2>(1);
   const [logs, setLogs] = usePersisted<Record<string, SetLog[]>>('logs', {});
@@ -81,6 +84,16 @@ export function useSlamPPLStore() {
   const wStep = useCallback(() => wStepUnits(units()), [units]);
 
   const getMirror = useCallback(() => mirror, [mirror]);
+
+  const schedule = useMemo<WeekSchedule>(() => ({ ...defaultSchedule, ...scheduleOverrides } as WeekSchedule), [scheduleOverrides]);
+  const week = useMemo(() => deriveWeek(schedule), [schedule]);
+
+  const setDaySchedule = useCallback(
+    (dow: number, type: ScheduleDay) => {
+      setScheduleOverrides((prev) => ({ ...prev, [dow]: type }));
+    },
+    [setScheduleOverrides],
+  );
 
   const defaultSlotPlan = useCallback(
     (slot: Slot): string[] => {
@@ -393,6 +406,9 @@ export function useSlamPPLStore() {
       if (Object.keys(remote.mirror).length && Object.keys(mirror).length === 0) {
         setMirror(remote.mirror);
       }
+      if (Object.keys(remote.schedule).length && Object.keys(scheduleOverrides).length === 0) {
+        setScheduleOverrides(remote.schedule);
+      }
       if (remote.sessions.length) {
         setSessions((prev) => {
           const byId = new Map(prev.map((s) => [s.id, s]));
@@ -412,7 +428,7 @@ export function useSlamPPLStore() {
         });
       }
     },
-    [plan, mirror, setUser, setPlan, setMirror, setSessions, setBodyweight],
+    [plan, mirror, scheduleOverrides, setUser, setPlan, setMirror, setScheduleOverrides, setSessions, setBodyweight],
   );
 
   const runSync = useCallback(
@@ -427,6 +443,7 @@ export function useSlamPPLStore() {
           theme,
           plan,
           mirror,
+          schedule: scheduleOverrides,
           sessions,
           bodyweight,
         });
@@ -437,7 +454,7 @@ export function useSlamPPLStore() {
         setSyncError(err instanceof Error ? err.message : 'Sync failed');
       }
     },
-    [applyRemoteMerge, user, theme, plan, mirror, sessions, bodyweight, setLastSyncedAt],
+    [applyRemoteMerge, user, theme, plan, mirror, scheduleOverrides, sessions, bodyweight, setLastSyncedAt],
   );
 
   const signIn = useCallback(async () => {
@@ -497,6 +514,7 @@ export function useSlamPPLStore() {
       cfgTab,
       cfgDay,
       mirror,
+      schedule,
       logs,
       doneTime,
       signedIn,
@@ -515,6 +533,8 @@ export function useSlamPPLStore() {
     units,
     dispW,
     wStep,
+    week,
+    setDaySchedule,
     getPlan,
     effSlot,
     planItems,
@@ -554,12 +574,12 @@ export function useSlamPPLStore() {
   };
 }
 
-export type Store = ReturnType<typeof useSlamPPLStore>;
+export type Store = ReturnType<typeof useWorkoutMeStore>;
 
 const StoreContext = createContext<Store | null>(null);
 
 export function StoreProvider({ children }: { children: ReactNode }) {
-  const store = useSlamPPLStore();
+  const store = useWorkoutMeStore();
   return <StoreContext.Provider value={store}>{children}</StoreContext.Provider>;
 }
 

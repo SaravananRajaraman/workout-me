@@ -104,7 +104,7 @@ export function SyncScreen() {
 
           <div style={{ background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 18, padding: '15px 16px', boxShadow: '0 8px 22px -16px var(--shadow)' }}>
             <div style={{ fontSize: 13, color: 'var(--text)', fontWeight: 600, lineHeight: 1.6 }}>
-              Your data is stored in a private &quot;Slam PPL Data&quot; spreadsheet in your Google Drive — profile, plan, sessions and body-weight logs, all in one place.
+              Your data is stored in a private &quot;Workout Me Data&quot; spreadsheet in your Google Drive — profile, plan, sessions and body-weight logs, all in one place.
             </div>
           </div>
 

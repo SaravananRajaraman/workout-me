@@ -1,4 +1,4 @@
-import type { DayType, ExerciseSeed, LibraryExercise, Slot } from './types';
+import type { DayType, ExerciseSeed, LibraryExercise, ScheduleDay, Slot, WeekSchedule } from './types';
 
 export const exercisesByDay: Record<DayType, ExerciseSeed[]> = {
   push: [
@@ -86,15 +86,44 @@ export const groupOf: Record<string, string> = {
   Triceps: 'Triceps', Cardio: 'Cardio', Back: 'Back', Traps: 'Traps', Biceps: 'Biceps', Quads: 'Quads', Hamstrings: 'Hamstrings', Glutes: 'Glutes', Calves: 'Calves',
 };
 
-export const dayTypeByDow: Record<number, 'rest' | DayType> = { 0: 'rest', 1: 'push', 2: 'pull', 3: 'legs', 4: 'push', 5: 'pull', 6: 'legs' };
-export const daySlotByDow: Record<number, Slot> = { 1: 'push1', 2: 'pull1', 3: 'legs1', 4: 'push2', 5: 'pull2', 6: 'legs2' };
-export const typeName: Record<'rest' | DayType, string> = { push: 'Push Day', pull: 'Pull Day', legs: 'Leg Day', rest: 'Rest Day' };
-export const typeSub: Record<'rest' | DayType, string> = { push: 'Chest · Shoulders · Triceps', pull: 'Back · Traps · Biceps', legs: 'Quads · Glutes · Calves', rest: 'Recover & grow' };
-export const dowLabels: { dow: number; letter: string; label: string }[] = [
-  { dow: 1, letter: 'P', label: 'Mon' }, { dow: 2, letter: 'P', label: 'Tue' }, { dow: 3, letter: 'L', label: 'Wed' },
-  { dow: 4, letter: 'P', label: 'Thu' }, { dow: 5, letter: 'P', label: 'Fri' }, { dow: 6, letter: 'L', label: 'Sat' },
-  { dow: 0, letter: 'R', label: 'Sun' },
+export const defaultSchedule: WeekSchedule = { 0: 'rest', 1: 'push', 2: 'pull', 3: 'legs', 4: 'push', 5: 'pull', 6: 'legs' };
+export const typeName: Record<ScheduleDay, string> = { push: 'Push Day', pull: 'Pull Day', legs: 'Leg Day', rest: 'Rest Day' };
+export const typeSub: Record<ScheduleDay, string> = { push: 'Chest · Shoulders · Triceps', pull: 'Back · Traps · Biceps', legs: 'Quads · Glutes · Calves', rest: 'Recover & grow' };
+
+/** Week in display order (Monday-first), with short day names. */
+export const weekDows: { dow: number; label: string }[] = [
+  { dow: 1, label: 'Mon' }, { dow: 2, label: 'Tue' }, { dow: 3, label: 'Wed' },
+  { dow: 4, label: 'Thu' }, { dow: 5, label: 'Fri' }, { dow: 6, label: 'Sat' },
+  { dow: 0, label: 'Sun' },
 ];
+
+export interface WeekView {
+  typeByDow: Record<number, ScheduleDay>;
+  slotByDow: Partial<Record<number, Slot>>;
+  labels: { dow: number; letter: string; label: string }[];
+}
+
+/**
+ * Expands a per-weekday schedule into the day-type/slot mappings the app runs on.
+ * Occurrences of a type within the week (Mon→Sun) alternate between its Day 1
+ * and Day 2 slots, so the existing two-variant plan system keeps working.
+ */
+export function deriveWeek(schedule: WeekSchedule): WeekView {
+  const typeByDow: Record<number, ScheduleDay> = {};
+  const slotByDow: Partial<Record<number, Slot>> = {};
+  const counts: Record<DayType, number> = { push: 0, pull: 0, legs: 0 };
+  const labels: WeekView['labels'] = [];
+  weekDows.forEach(({ dow, label }) => {
+    const type: ScheduleDay = schedule[dow] ?? 'rest';
+    typeByDow[dow] = type;
+    if (type !== 'rest') {
+      counts[type] += 1;
+      slotByDow[dow] = `${type}${counts[type] % 2 === 1 ? 1 : 2}` as Slot;
+    }
+    labels.push({ dow, letter: type === 'rest' ? 'R' : type === 'legs' ? 'L' : 'P', label });
+  });
+  return { typeByDow, slotByDow, labels };
+}
 
 export function slug(s: string): string {
   return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');

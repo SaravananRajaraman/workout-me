@@ -43,14 +43,11 @@ export async function createSpreadsheet(
   return data.spreadsheetId;
 }
 
-export async function findOrCreateSpreadsheet(
-  accessToken: string,
-  title: string,
-  sheetTitles: string[],
-): Promise<string> {
-  const existing = await findSpreadsheet(accessToken, title);
-  if (existing) return existing;
-  return createSpreadsheet(accessToken, title, sheetTitles);
+export async function renameFile(accessToken: string, fileId: string, name: string): Promise<void> {
+  await apiFetch(`${DRIVE_FILES_URL}/${fileId}`, accessToken, {
+    method: 'PATCH',
+    body: JSON.stringify({ name }),
+  });
 }
 
 export async function getValues(

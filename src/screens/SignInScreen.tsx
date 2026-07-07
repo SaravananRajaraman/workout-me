@@ -24,7 +24,7 @@ export function SignInScreen() {
           <div style={{ width: 8, height: 24, borderRadius: 2, background: '#fff' }} />
         </div>
       </div>
-      <div style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 800, fontSize: 26, color: 'var(--text)', marginTop: 4 }}>Slam PPL</div>
+      <div style={{ fontFamily: "'Baloo 2',sans-serif", fontWeight: 800, fontSize: 26, color: 'var(--text)', marginTop: 4 }}>Workout Me</div>
       <div style={{ fontSize: 13.5, color: 'var(--muted)', fontWeight: 700, marginTop: -8 }}>Push · Pull · Legs — every rep counts</div>
       <div style={{ fontSize: 13, color: 'var(--muted)', fontWeight: 600, lineHeight: 1.6, maxWidth: 230, marginTop: 4 }}>
         Sign in to back up every workout to Google Drive and pick up on any device.

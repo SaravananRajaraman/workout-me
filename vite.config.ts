@@ -12,9 +12,9 @@ export default defineConfig(({ command }) => ({
       registerType: 'autoUpdate',
       includeAssets: ['icon-180.png'],
       manifest: {
-        name: 'Slam PPL — Push Pull Legs Tracker',
-        short_name: 'Slam PPL',
-        description: 'Push / Pull / Legs workout tracker for Slam Fitness with Google sync.',
+        name: 'Workout Me — Workout Tracker',
+        short_name: 'Workout Me',
+        description: 'Push / Pull / Legs workout tracker with Google sync.',
         start_url: base,
         scope: base,
         display: 'standalone',
