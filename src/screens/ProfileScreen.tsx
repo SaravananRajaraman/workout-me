@@ -144,6 +144,14 @@ export function ProfileScreen() {
       <div onClick={signOut} style={{ textAlign: 'center', fontSize: 13, color: 'var(--hero1)', fontWeight: 800, padding: 6, cursor: 'pointer' }}>
         Sign out
       </div>
+
+      <div style={{ textAlign: 'center', fontSize: 10.5, color: 'var(--muted)', fontWeight: 600, opacity: 0.7, padding: '2px 12px' }}>
+        Exercise images &amp; animations © Gym Visual (gymvisual.com), via{' '}
+        <a href="https://github.com/hasaneyldrm/exercises-dataset" target="_blank" rel="noreferrer" style={{ color: 'inherit' }}>
+          exercises-dataset
+        </a>{' '}
+        (MIT)
+      </div>
     </div>
   );
 }

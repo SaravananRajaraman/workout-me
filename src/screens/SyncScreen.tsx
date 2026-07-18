@@ -1,10 +1,13 @@
 import { useStore } from '../state/store';
 import { formatRelative } from '../lib/date';
+import { useOnline } from '../lib/useOnline';
 
 export function SyncScreen() {
   const { state, back, signIn, signOut, syncNow, toggleWifi } = useStore();
   const syncing = state.sync.status === 'syncing';
   const initial = (state.googleEmail || 'G').trim().charAt(0).toUpperCase();
+  const online = useOnline();
+  const canSignIn = state.googleConfigured && online;
 
   return (
     <div style={{ padding: '6px 16px 20px', display: 'flex', flexDirection: 'column', gap: 13 }}>
@@ -24,7 +27,7 @@ export function SyncScreen() {
           </div>
           <button
             onClick={signIn}
-            disabled={!state.googleConfigured}
+            disabled={!canSignIn}
             style={{
               width: '100%',
               border: 'none',
@@ -35,8 +38,8 @@ export function SyncScreen() {
               fontSize: 15,
               padding: 14,
               borderRadius: 15,
-              cursor: state.googleConfigured ? 'pointer' : 'not-allowed',
-              opacity: state.googleConfigured ? 1 : 0.5,
+              cursor: canSignIn ? 'pointer' : 'not-allowed',
+              opacity: canSignIn ? 1 : 0.5,
             }}
           >
             Connect Google account
@@ -44,6 +47,11 @@ export function SyncScreen() {
           {!state.googleConfigured && (
             <div style={{ fontSize: 11, color: 'var(--muted)', fontWeight: 700, marginTop: 10 }}>
               Missing VITE_GOOGLE_CLIENT_ID — see .env.example.
+            </div>
+          )}
+          {state.googleConfigured && !online && (
+            <div style={{ fontSize: 11, color: 'var(--muted)', fontWeight: 700, marginTop: 10 }}>
+              You&apos;re offline — connect once you&apos;re back online.
             </div>
           )}
         </div>
@@ -72,8 +80,8 @@ export function SyncScreen() {
               </div>
               <button
                 onClick={syncNow}
-                disabled={syncing}
-                style={{ display: 'flex', alignItems: 'center', gap: 7, border: 'none', background: 'var(--card2)', color: 'var(--text)', fontWeight: 800, fontSize: 12, padding: '9px 14px', borderRadius: 13, cursor: syncing ? 'default' : 'pointer' }}
+                disabled={syncing || !online}
+                style={{ display: 'flex', alignItems: 'center', gap: 7, border: 'none', background: 'var(--card2)', color: 'var(--text)', fontWeight: 800, fontSize: 12, padding: '9px 14px', borderRadius: 13, cursor: syncing || !online ? 'default' : 'pointer', opacity: !online ? 0.5 : 1 }}
               >
                 {syncing ? (
                   <>
@@ -82,8 +90,8 @@ export function SyncScreen() {
                   </>
                 ) : (
                   <>
-                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--good)', display: 'inline-block' }} />
-                    Sync now
+                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: online ? 'var(--good)' : 'var(--muted)', display: 'inline-block' }} />
+                    {online ? 'Sync now' : 'Offline'}
                   </>
                 )}
               </button>

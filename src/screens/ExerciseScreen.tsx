@@ -19,7 +19,7 @@ export function ExerciseScreen() {
         <div
           role="img"
           aria-label={ex.name}
-          style={{ width: '100%', height: '100%', backgroundColor: 'var(--card2)', backgroundImage: `url(${assetUrl(ex.img)})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+          style={{ width: '100%', height: '100%', backgroundColor: 'var(--card2)', backgroundImage: `url(${assetUrl(ex.gifUrl ?? ex.img)})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
         />
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg,rgba(0,0,0,.28) 0%,rgba(0,0,0,.05) 40%,rgba(0,0,0,.66) 100%)' }} />
         <div

@@ -1,7 +1,10 @@
 import { useStore } from '../state/store';
+import { useOnline } from '../lib/useOnline';
 
 export function SignInScreen() {
   const { signIn, skipSignin, state } = useStore();
+  const online = useOnline();
+  const canSignIn = state.googleConfigured && online;
 
   return (
     <div style={{ padding: '30px 26px 26px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 15, minHeight: '100%', flex: 1 }}>
@@ -31,7 +34,7 @@ export function SignInScreen() {
       </div>
       <button
         onClick={signIn}
-        disabled={!state.googleConfigured}
+        disabled={!canSignIn}
         style={{
           width: '100%',
           display: 'flex',
@@ -46,8 +49,8 @@ export function SignInScreen() {
           fontWeight: 800,
           fontSize: 14,
           color: '#3c3c3c',
-          cursor: state.googleConfigured ? 'pointer' : 'not-allowed',
-          opacity: state.googleConfigured ? 1 : 0.5,
+          cursor: canSignIn ? 'pointer' : 'not-allowed',
+          opacity: canSignIn ? 1 : 0.5,
           marginTop: 10,
           boxShadow: '0 6px 16px -8px rgba(0,0,0,.2)',
         }}
@@ -63,6 +66,11 @@ export function SignInScreen() {
       {!state.googleConfigured && (
         <div style={{ fontSize: 11, color: 'var(--muted)', fontWeight: 700 }}>
           Google sign-in isn&apos;t configured yet — set VITE_GOOGLE_CLIENT_ID to enable it.
+        </div>
+      )}
+      {state.googleConfigured && !online && (
+        <div style={{ fontSize: 11, color: 'var(--muted)', fontWeight: 700 }}>
+          You&apos;re offline — sign in once you&apos;re back online.
         </div>
       )}
       <div onClick={skipSignin} style={{ fontSize: 13, color: 'var(--muted)', fontWeight: 800, textDecoration: 'underline', marginTop: 'auto', cursor: 'pointer' }}>

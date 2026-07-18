@@ -4,5 +4,6 @@
  * them against the actual configured base (e.g. '/workout-me/' on GitHub Pages, '/' in dev).
  */
 export function assetUrl(path: string): string {
+  if (/^https?:\/\//i.test(path)) return path;
   return `${import.meta.env.BASE_URL}${path.replace(/^\//, '')}`;
 }

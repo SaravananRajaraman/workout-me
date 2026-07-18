@@ -11,6 +11,7 @@ import { BottomNav } from './components/BottomNav';
 import { SetupSheet } from './components/SetupSheet';
 import { RestTimerSheet } from './components/RestTimerSheet';
 import { DayEditSheet } from './components/DayEditSheet';
+import { OfflineBanner } from './components/OfflineBanner';
 
 function Shell() {
   const { state } = useStore();
@@ -24,6 +25,7 @@ function Shell() {
   return (
     <div style={{ height: '100dvh', background: 'var(--bg)', display: 'flex', justifyContent: 'center' }}>
       <div style={{ width: '100%', maxWidth: 430, height: '100dvh', display: 'flex', flexDirection: 'column', background: 'var(--bg)', position: 'relative', overflow: 'hidden' }}>
+        <OfflineBanner />
         <div className="scr" style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
           {state.screen === 'signin' && <SignInScreen />}
           {state.screen === 'today' && <TodayScreen />}

@@ -10,6 +10,7 @@ export interface ExerciseSeed {
   reps?: number;
   last?: number;
   img: string;
+  gifUrl?: string;
   tip: string;
   time?: boolean;
   dur?: number;
@@ -23,6 +24,7 @@ export interface LibraryExercise {
   muscle: string;
   group: string;
   img: string;
+  gifUrl?: string;
   tip: string;
   sets: number;
   reps: number;

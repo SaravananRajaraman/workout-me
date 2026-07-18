@@ -27,7 +27,18 @@ export default defineConfig(({ command }) => ({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,jpg,svg}'],
+        globPatterns: ['**/*.{js,css,html,ico,png,jpg,gif,svg,woff2}'],
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/raw\.githubusercontent\.com\/hasaneyldrm\/exercises-dataset\/.*\.(?:jpg|gif)$/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'exercise-dataset-media',
+              expiration: { maxEntries: 400, maxAgeSeconds: 60 * 60 * 24 * 30 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+        ],
       },
     }),
   ],

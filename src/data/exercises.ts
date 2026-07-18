@@ -1,4 +1,6 @@
 import type { DayType, ExerciseSeed, LibraryExercise, ScheduleDay } from './types';
+import { datasetExercises } from './generated/datasetExercises';
+import { curatedGifs } from './curatedGifs';
 
 export const exercisesByDay: Record<DayType, ExerciseSeed[]> = {
   push: [
@@ -78,10 +80,11 @@ export const extraLib: Record<DayType, ExerciseSeed[]> = {
 export const groupOf: Record<string, string> = {
   Chest: 'Chest', 'Upper Chest': 'Chest', Shoulders: 'Shoulders', 'Side Delts': 'Shoulders', 'Front Delts': 'Shoulders', 'Rear Delts': 'Shoulders',
   Triceps: 'Triceps', Cardio: 'Cardio', Back: 'Back', Traps: 'Traps', Biceps: 'Biceps', Quads: 'Quads', Hamstrings: 'Hamstrings', Glutes: 'Glutes', Calves: 'Calves',
+  Forearms: 'Forearms', Abs: 'Core', Core: 'Core',
 };
 
 export const typeName: Record<ScheduleDay, string> = { push: 'Push Day', pull: 'Pull Day', legs: 'Leg Day', rest: 'Rest Day' };
-export const typeSub: Record<ScheduleDay, string> = { push: 'Chest · Shoulders · Triceps', pull: 'Back · Traps · Biceps', legs: 'Quads · Glutes · Calves', rest: 'Recover & grow' };
+export const typeSub: Record<ScheduleDay, string> = { push: 'Chest · Shoulders · Triceps', pull: 'Back · Traps · Biceps · Forearms', legs: 'Quads · Glutes · Calves · Core', rest: 'Recover & grow' };
 
 /** PPL rotation: the workout type that naturally follows the given one. */
 export function nextType(type: DayType): DayType {
@@ -134,6 +137,20 @@ export function buildLibrary(): WorkoutLibrary {
       (ex.alts || []).forEach((a) => add(a, ex.sets));
     });
     (extraLib[type] || []).forEach((ex) => add(ex, ex.sets));
+  });
+
+  // Attach vendored gifs to the curated set (see scripts/prep-exercises.mjs).
+  Object.entries(curatedGifs).forEach(([id, gifUrl]) => {
+    const item = libById[id];
+    if (item) item.gifUrl = gifUrl;
+  });
+
+  // Merge in the long-tail exercises sourced from exercises-dataset for extra
+  // variety in ConfigScreen/ExerciseScreen — never added to defaultPlan.
+  datasetExercises.forEach((item) => {
+    if (libById[item.id]) return;
+    library[item.type].push(item);
+    libById[item.id] = item;
   });
 
   return { library, libById, defaultPlan };
