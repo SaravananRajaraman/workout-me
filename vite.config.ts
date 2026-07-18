@@ -4,8 +4,8 @@ import { VitePWA } from 'vite-plugin-pwa';
 
 const base = '/workout-me/';
 
-export default defineConfig(({ command }) => ({
-  base: command === 'build' ? base : '/',
+export default defineConfig(({ command, isPreview }) => ({
+  base: command === 'build' || isPreview ? base : '/',
   plugins: [
     react(),
     VitePWA({

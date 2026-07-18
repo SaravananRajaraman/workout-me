@@ -4,11 +4,15 @@
 //   - src/data/generated/datasetExercises.ts  (long-tail library entries, English-only)
 //   - src/data/curatedGifs.ts                 (curated exercise id -> gif URL)
 //   - public/gifs/<slug>.gif                  (vendored gifs for the curated set only)
+//   - public/img/*.jpg                        (curated static images replaced in place)
+//
+// If tmp/exercises-dataset (a local clone of the dataset repo) exists, media is read
+// from disk instead of the network — much faster for repeat runs.
 //
 // Not run in CI. Re-run manually if the upstream dataset changes.
 // Usage:
 //   node scripts/prep-exercises.mjs report   -- fetch/parse + print match report only, writes nothing
-//   node scripts/prep-exercises.mjs build    -- full run: writes generated files + downloads curated gifs
+//   node scripts/prep-exercises.mjs build    -- full run: writes generated files + downloads curated media
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -20,10 +24,16 @@ const CACHE_DIR = path.join(__dirname, '.cache');
 const DATASET_JSON = path.join(CACHE_DIR, 'exercises.json');
 const OVERRIDES_PATH = path.join(__dirname, 'curated-overrides.json');
 const RAW_BASE = 'https://raw.githubusercontent.com/hasaneyldrm/exercises-dataset/main';
+const LOCAL_CLONE_DIR = path.join(ROOT, 'tmp/exercises-dataset');
+const useLocalClone = fs.existsSync(LOCAL_CLONE_DIR);
 
 const mode = process.argv[2] || 'report';
 
 async function ensureDataset() {
+  if (useLocalClone) {
+    const localJson = path.join(LOCAL_CLONE_DIR, 'data/exercises.json');
+    if (fs.existsSync(localJson)) return JSON.parse(fs.readFileSync(localJson, 'utf8'));
+  }
   if (fs.existsSync(DATASET_JSON)) return JSON.parse(fs.readFileSync(DATASET_JSON, 'utf8'));
   fs.mkdirSync(CACHE_DIR, { recursive: true });
   console.log('Downloading dataset JSON (~17MB)...');
@@ -32,6 +42,17 @@ async function ensureDataset() {
   const text = await res.text();
   fs.writeFileSync(DATASET_JSON, text);
   return JSON.parse(text);
+}
+
+// relPath e.g. "images/0001-2gPfomN.jpg" or "videos/0001-2gPfomN.gif"
+async function fetchMedia(relPath) {
+  if (useLocalClone) {
+    const localPath = path.join(LOCAL_CLONE_DIR, relPath);
+    if (fs.existsSync(localPath)) return fs.readFileSync(localPath);
+  }
+  const res = await fetch(`${RAW_BASE}/${relPath}`);
+  if (!res.ok) throw new Error(`HTTP ${res.status} for ${relPath}`);
+  return Buffer.from(await res.arrayBuffer());
 }
 
 // target -> { group, type } — see plan for rationale on each bucket
@@ -95,6 +116,17 @@ function extractCuratedNames() {
   let m;
   while ((m = re.exec(text))) names.push(m[1]);
   return [...new Set(names)];
+}
+
+// Curated exercises reference hand-chosen image filenames (e.g. '/img/bench.jpg'),
+// NOT slug(name) — so replacing images in place requires this exact mapping.
+function extractCuratedImagePaths() {
+  const text = fs.readFileSync(path.join(ROOT, 'src/data/exercises.ts'), 'utf8');
+  const re = /name: '([^']+)'[^{}]*?img: '([^']+)'/g;
+  const byName = {};
+  let m;
+  while ((m = re.exec(text))) byName[m[1]] = m[2];
+  return byName;
 }
 
 function cleanTip(en) {
@@ -181,6 +213,8 @@ async function main() {
 
   const usedDatasetIds = new Set(Object.values(matches).filter(Boolean).map((r) => r.id));
 
+  console.log(useLocalClone ? '\nUsing local clone at tmp/exercises-dataset for media.\n' : '\nNo local clone found — downloading media over the network.\n');
+
   // curatedGifs.ts + gif downloads
   const gifsDir = path.join(ROOT, 'public/gifs');
   fs.mkdirSync(gifsDir, { recursive: true });
@@ -191,17 +225,14 @@ async function main() {
     const id = slug(name);
     const destName = `${id}.gif`;
     const destPath = path.join(gifsDir, destName);
-    if (!fs.existsSync(destPath)) {
-      const url = `${RAW_BASE}/${rec.gif_url}`;
-      process.stdout.write(`Downloading gif for "${name}"... `);
-      const res = await fetch(url);
-      if (!res.ok) {
-        console.log(`FAILED (${res.status})`);
-        continue;
-      }
-      const buf = Buffer.from(await res.arrayBuffer());
+    process.stdout.write(`Gif for "${name}"... `);
+    try {
+      const buf = await fetchMedia(rec.gif_url);
       fs.writeFileSync(destPath, buf);
       console.log(`${(buf.length / 1024).toFixed(0)}KB`);
+    } catch (err) {
+      console.log(`FAILED (${err.message})`);
+      continue;
     }
     const size = fs.statSync(destPath).size;
     totalGifBytes += size;
@@ -215,6 +246,34 @@ async function main() {
       `// Maps curated exercise id -> vendored gif path (public/gifs/*.gif).\n` +
       `export const curatedGifs: Record<string, string> = ${JSON.stringify(curatedGifs, null, 2)};\n`,
   );
+
+  // Replace curated static images with the matched dataset thumbnail — overwrites
+  // the exact existing filename each exercise's `img` field already points at
+  // (e.g. '/img/bench.jpg'), so no changes to exercises.ts are needed.
+  const curatedImagePaths = extractCuratedImagePaths();
+  let totalImgBytes = 0;
+  let imgReplacedCount = 0;
+  for (const [name, rec] of Object.entries(matches)) {
+    if (!rec || !rec.image) continue;
+    const relImgPath = curatedImagePaths[name];
+    if (!relImgPath) {
+      console.log(`Image for "${name}"... SKIPPED (no img path found in exercises.ts)`);
+      continue;
+    }
+    const destPath = path.join(ROOT, 'public', relImgPath.replace(/^\//, ''));
+    process.stdout.write(`Image for "${name}" (${relImgPath})... `);
+    try {
+      const buf = await fetchMedia(rec.image);
+      fs.writeFileSync(destPath, buf);
+      console.log(`${(buf.length / 1024).toFixed(0)}KB`);
+    } catch (err) {
+      console.log(`FAILED (${err.message})`);
+      continue;
+    }
+    totalImgBytes += fs.statSync(destPath).size;
+    imgReplacedCount++;
+  }
+  console.log(`\nReplaced ${imgReplacedCount} curated images (${(totalImgBytes / 1024 / 1024).toFixed(1)}MB total).`);
 
   // long-tail dataset entries
   const genDir = path.join(ROOT, 'src/data/generated');
