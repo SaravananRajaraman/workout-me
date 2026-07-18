@@ -97,7 +97,7 @@ export function ConfigScreen() {
                       boxShadow: '0 6px 16px -14px var(--shadow)',
                     }}
                   >
-                    <div role="img" aria-label={item.name} style={{ width: 52, height: 52, borderRadius: 11, backgroundColor: 'var(--card2)', backgroundImage: `url(${assetUrl(item.img)})`, backgroundSize: 'cover', backgroundPosition: 'center', flexShrink: 0 }} />
+                    <div role="img" aria-label={item.name} style={{ width: 52, height: 52, borderRadius: 11, backgroundColor: 'var(--card2)', backgroundImage: `url(${assetUrl(item.img)})`, backgroundSize: 'auto', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', flexShrink: 0 }} />
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: 13.5, fontWeight: 800, color: 'var(--text)', lineHeight: 1.2 }}>{item.name}</div>
                       <div style={{ fontSize: 11, color: 'var(--muted)', fontWeight: 700, marginTop: 2 }}>{item.muscle}</div>
