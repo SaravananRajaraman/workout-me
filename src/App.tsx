@@ -24,7 +24,7 @@ function Shell() {
 
   return (
     <div style={{ height: '100dvh', background: 'var(--bg)', display: 'flex', justifyContent: 'center' }}>
-      <div style={{ width: '100%', maxWidth: 430, height: '100dvh', display: 'flex', flexDirection: 'column', background: 'var(--bg)', position: 'relative', overflow: 'hidden' }}>
+      <div style={{ width: '100%', maxWidth: 480, height: '100dvh', display: 'flex', flexDirection: 'column', background: 'var(--bg)', position: 'relative', overflow: 'hidden' }}>
         <OfflineBanner />
         <div className="scr" style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
           {state.screen === 'signin' && <SignInScreen />}

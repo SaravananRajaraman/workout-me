@@ -18,3 +18,15 @@ createRoot(document.getElementById('root')!).render(
     <App />
   </StrictMode>,
 );
+
+// vite-plugin-pwa's autoUpdate mode activates a new service worker (skipWaiting +
+// clientsClaim) without reloading already-open tabs, so old JS can keep running
+// against a new SW until this fires — reload once to pick up the fresh build.
+if ('serviceWorker' in navigator) {
+  let refreshed = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (refreshed) return;
+    refreshed = true;
+    window.location.reload();
+  });
+}

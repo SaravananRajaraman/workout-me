@@ -152,6 +152,9 @@ export function ProfileScreen() {
         </a>{' '}
         (MIT)
       </div>
+      <div style={{ textAlign: 'center', fontSize: 10, color: 'var(--muted)', fontWeight: 700, opacity: 0.6, fontFamily: "'JetBrains Mono',monospace" }}>
+        v{__APP_VERSION__} · {__BUILD_COMMIT__} · {new Date(__BUILD_TIME__).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}
+      </div>
     </div>
   );
 }
