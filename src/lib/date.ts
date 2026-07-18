@@ -48,6 +48,42 @@ export function lastNDays(days: number): string[] {
   return out;
 }
 
+export function startOfMonth(d: Date): Date {
+  return new Date(d.getFullYear(), d.getMonth(), 1);
+}
+
+export function addMonths(d: Date, n: number): Date {
+  return new Date(d.getFullYear(), d.getMonth() + n, 1);
+}
+
+export function monthLabel(d: Date): string {
+  return d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+}
+
+export function isSameMonth(a: Date, b: Date): boolean {
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth();
+}
+
+/** Calendar grid for a month, Monday-start weeks; null = leading/trailing padding cell. */
+export function monthGrid(viewDate: Date): (string | null)[] {
+  const first = startOfMonth(viewDate);
+  const firstDow = (first.getDay() + 6) % 7; // Monday-start
+  const daysInMonth = new Date(first.getFullYear(), first.getMonth() + 1, 0).getDate();
+  const cells: (string | null)[] = [];
+  for (let i = 0; i < firstDow; i++) cells.push(null);
+  for (let day = 1; day <= daysInMonth; day++) {
+    cells.push(isoDate(new Date(first.getFullYear(), first.getMonth(), day)));
+  }
+  while (cells.length % 7 !== 0) cells.push(null);
+  return cells;
+}
+
+/** Day-of-week for a YYYY-MM-DD string, parsed as a local date (not UTC). */
+export function dowOf(dateISO: string): number {
+  const [y, m, d] = dateISO.split('-').map(Number);
+  return new Date(y, m - 1, d).getDay();
+}
+
 export function formatRelative(iso: string | null): string {
   if (!iso) return 'Never synced';
   const diffMs = Date.now() - new Date(iso).getTime();

@@ -10,6 +10,7 @@ import { SyncScreen } from './screens/SyncScreen';
 import { BottomNav } from './components/BottomNav';
 import { SetupSheet } from './components/SetupSheet';
 import { RestTimerSheet } from './components/RestTimerSheet';
+import { DayEditSheet } from './components/DayEditSheet';
 
 function Shell() {
   const { state } = useStore();
@@ -35,6 +36,7 @@ function Shell() {
         {showNav && <BottomNav />}
         <SetupSheet />
         <RestTimerSheet />
+        <DayEditSheet />
       </div>
     </div>
   );

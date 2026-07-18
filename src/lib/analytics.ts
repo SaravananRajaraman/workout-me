@@ -1,13 +1,11 @@
-import { computeStreak, lastNDays, weekKey } from './date';
+import { computeStreak, weekKey } from './date';
 import type { BodyweightEntry, Session } from '../state/types';
 
 export interface ProgressStats {
   streak: number;
-  consistencyDots: boolean[]; // last 35 days, oldest first
   weeklyVolume: { weekKey: string; total: number }[]; // last 8 weeks, oldest first
   prs: { name: string; kg: number; setDate: string | null }[];
   bodyweightSeries: BodyweightEntry[]; // last 8 entries, oldest first
-  sessionsThisWeek: number;
 }
 
 const MARQUEE_LIFTS = ['barbell-bench-press', 'barbell-back-squat', 'deadlift'];
@@ -20,9 +18,6 @@ const MARQUEE_LABELS: Record<string, string> = {
 export function computeProgress(sessions: Session[], bodyweight: BodyweightEntry[]): ProgressStats {
   const sessionDates = new Set(sessions.map((s) => s.date));
   const streak = computeStreak(sessionDates);
-
-  const days = lastNDays(35);
-  const consistencyDots = days.map((d) => sessionDates.has(d));
 
   const weekBuckets = new Map<string, number>();
   sessions.forEach((s) => {
@@ -57,8 +52,5 @@ export function computeProgress(sessions: Session[], bodyweight: BodyweightEntry
 
   const bodyweightSeries = bodyweight.slice(-8);
 
-  const startOfThisWeek = weekKey(now.toISOString().slice(0, 10));
-  const sessionsThisWeek = sessions.filter((s) => weekKey(s.date) === startOfThisWeek).length;
-
-  return { streak, consistencyDots, weeklyVolume, prs, bodyweightSeries, sessionsThisWeek };
+  return { streak, weeklyVolume, prs, bodyweightSeries };
 }

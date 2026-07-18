@@ -81,6 +81,7 @@ export interface AppState {
   draft: UserProfile | null;
   sessions: Session[];
   bodyweight: BodyweightEntry[];
+  editDate: string | null;
 }
 
 export const defaultUser: UserProfile = {

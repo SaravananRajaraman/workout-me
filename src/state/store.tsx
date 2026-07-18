@@ -11,8 +11,8 @@ import {
 import type { DayType, ScheduleDay, SetLog } from '../data/types';
 import { allTypes, buildLibrary, nextType } from '../data/exercises';
 import { loadJSON, saveJSON } from './storage';
-import { defaultUser, type BodyweightEntry, type DaySelection, type Screen, type Session, type UserProfile } from './types';
-import { todayISO } from '../lib/date';
+import { defaultUser, type BodyweightEntry, type DaySelection, type Screen, type Session, type SessionItem, type UserProfile } from './types';
+import { dowOf, todayISO } from '../lib/date';
 import {
   ensureSpreadsheet,
   pullAll,
@@ -58,6 +58,7 @@ export function useWorkoutMeStore() {
   const [draft, setDraftState] = useState<UserProfile | null>(null);
   const [setupOpen, setSetupOpen] = useState(false);
   const [sessions, setSessions] = usePersisted<Session[]>('sessions', []);
+  const [editDate, setEditDate] = useState<string | null>(null);
   const [bodyweight, setBodyweight] = usePersisted<BodyweightEntry[]>('bodyweight', []);
   const [spreadsheetId, setSpreadsheetId] = usePersisted<string | null>('spreadsheetId', null);
   const [lastSyncedAt, setLastSyncedAt] = usePersisted<string | null>('lastSyncedAt', null);
@@ -343,6 +344,42 @@ export function useWorkoutMeStore() {
     [planItems, getSets, setSessions],
   );
 
+  const openDayEdit = useCallback((date: string) => {
+    if (date > todayISO()) return;
+    setEditDate(date);
+  }, []);
+  const closeDayEdit = useCallback(() => setEditDate(null), []);
+
+  const getSessionForDate = useCallback((date: string) => sessions.find((s) => s.date === date), [sessions]);
+
+  const saveDaySession = useCallback(
+    (date: string, type: DayType, items: SessionItem[]) => {
+      setSessions((prev) => {
+        const existing = prev.find((s) => s.date === date);
+        const session: Session = {
+          id: existing?.id ?? `${date}-${type}-${Date.now()}`,
+          date,
+          dow: dowOf(date),
+          type,
+          items,
+          totalVolume: items.reduce((sum, i) => sum + i.volume, 0),
+        };
+        if (existing) return prev.map((s) => (s.date === date ? session : s));
+        return [...prev, session];
+      });
+      setEditDate(null);
+    },
+    [setSessions],
+  );
+
+  const deleteDaySession = useCallback(
+    (date: string) => {
+      setSessions((prev) => prev.filter((s) => s.date !== date));
+      setEditDate(null);
+    },
+    [setSessions],
+  );
+
   // --- Google sync ---
   const applyRemoteMerge = useCallback(
     (remote: Awaited<ReturnType<typeof pullAll>>) => {
@@ -475,6 +512,7 @@ export function useWorkoutMeStore() {
       setupOpen,
       sessions,
       bodyweight,
+      editDate,
       rest,
       sync: { status: syncStatus, lastSyncedAt, error: syncError },
       googleConfigured: isGoogleConfigured(),
@@ -509,6 +547,11 @@ export function useWorkoutMeStore() {
     saveSetup,
     logBodyweight,
     finishWorkout,
+    openDayEdit,
+    closeDayEdit,
+    getSessionForDate,
+    saveDaySession,
+    deleteDaySession,
     signIn,
     skipSignin,
     signOut,

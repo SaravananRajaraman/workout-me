@@ -1,11 +1,25 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useStore } from '../state/store';
 import { computeProgress } from '../lib/analytics';
+import { addMonths, isSameMonth, monthGrid, monthLabel, startOfMonth, todayISO } from '../lib/date';
+
+const WEEKDAY_LABELS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 
 export function ProgressScreen() {
-  const { state, getUser } = useStore();
+  const { state, getUser, openDayEdit } = useStore();
   const stats = useMemo(() => computeProgress(state.sessions, state.bodyweight), [state.sessions, state.bodyweight]);
   const user = getUser();
+
+  const today = todayISO();
+  const currentMonth = useMemo(() => startOfMonth(new Date()), []);
+  const [viewMonth, setViewMonth] = useState(currentMonth);
+  const sessionDates = useMemo(() => new Set(state.sessions.map((s) => s.date)), [state.sessions]);
+  const cells = useMemo(() => monthGrid(viewMonth), [viewMonth]);
+  const atCurrentMonth = isSameMonth(viewMonth, currentMonth);
+  const sessionsInMonth = useMemo(
+    () => cells.filter((c) => c !== null && sessionDates.has(c)).length,
+    [cells, sessionDates],
+  );
 
   const bw = stats.bodyweightSeries;
   const hasBw = bw.length >= 2;
@@ -92,13 +106,78 @@ export function ProgressScreen() {
             <span style={{ fontSize: 11, color: 'var(--muted)', fontWeight: 800 }}>days</span>
           </div>
         </div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginTop: 12, width: '100%' }}>
-          {stats.consistencyDots.map((on, i) => (
-            <div key={i} style={{ width: 23, height: 23, borderRadius: 7, background: on ? 'var(--good)' : 'var(--card2)' }} />
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 14 }}>
+          <div
+            onClick={() => setViewMonth((m) => addMonths(m, -1))}
+            style={{ width: 26, height: 26, borderRadius: 8, background: 'var(--card2)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontWeight: 800, color: 'var(--text)', fontSize: 13 }}
+          >
+            ‹
+          </div>
+          <div style={{ fontSize: 12.5, fontWeight: 800, color: 'var(--text)' }}>{monthLabel(viewMonth)}</div>
+          <div
+            onClick={() => !atCurrentMonth && setViewMonth((m) => addMonths(m, 1))}
+            style={{
+              width: 26,
+              height: 26,
+              borderRadius: 8,
+              background: 'var(--card2)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: atCurrentMonth ? 'default' : 'pointer',
+              fontWeight: 800,
+              color: atCurrentMonth ? 'var(--line)' : 'var(--text)',
+              fontSize: 13,
+            }}
+          >
+            ›
+          </div>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 5, marginTop: 10 }}>
+          {WEEKDAY_LABELS.map((d, i) => (
+            <div key={i} style={{ textAlign: 'center', fontSize: 9.5, fontWeight: 800, color: 'var(--muted)' }}>
+              {d}
+            </div>
           ))}
+          {cells.map((iso, i) => {
+            if (!iso) return <div key={i} />;
+            const done = sessionDates.has(iso);
+            const isToday = iso === today;
+            const isPast = iso < today;
+            const isFuture = iso > today;
+            const missed = isPast && !done;
+            return (
+              <div
+                key={i}
+                onClick={() => !isFuture && openDayEdit(iso)}
+                style={{
+                  aspectRatio: '1',
+                  borderRadius: 7,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: done ? 'var(--good)' : 'var(--card2)',
+                  border: isToday ? '1.5px solid var(--hero1)' : 'none',
+                  opacity: isFuture ? 0.45 : 1,
+                  cursor: isFuture ? 'default' : 'pointer',
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: 10.5,
+                    fontWeight: 800,
+                    color: done ? '#fff' : 'var(--muted)',
+                    textDecoration: missed ? 'line-through' : 'none',
+                  }}
+                >
+                  {Number(iso.slice(-2))}
+                </span>
+              </div>
+            );
+          })}
         </div>
         <div style={{ fontSize: 11.5, color: 'var(--muted)', fontWeight: 700, marginTop: 11 }}>
-          This week <b style={{ color: 'var(--text)' }}>{stats.sessionsThisWeek}</b> sessions · last 5 weeks
+          <b style={{ color: 'var(--text)' }}>{sessionsInMonth}</b> sessions logged this month
         </div>
       </div>
 
